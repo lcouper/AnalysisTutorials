@@ -11,4 +11,5 @@ This tutorial go through the steps involved in fitting Bayesian models to mosqui
 6) Checking the fits from the low information and informative priors
 6) Plotting thermal response curves and parameter estimates 
 
-The data can be found in this folder, titled "LifeHistoryTraitExp_TutorialData.csv"
+The tutorial can be found here, and the accompanying dataset is in this folder, titled "LifeHistoryTraitExp_TutorialData.csv" 
+ 
