@@ -675,7 +675,7 @@ Now lets visualize our beautiful thermal response curves and parameter estimates
 ```{r, warning = FALSE}
 library(ggplot2)
 
-# The first plot will be the thermal response curves for each population:
+# First we'll plot the thermal response curves for each population:
 load("LDR_meansd_inf.Rsave") # to bypass above code of generating parameter estimates & credible intervals
 
 plot(LarvalDevRate ~ Temp.Treatment, 
@@ -693,7 +693,8 @@ lines(LDR.PAR.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.x
 lines(LDR.SB.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#ec3c30", lwd = 1.5)
 lines(LDR.POW.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#ab041b", lwd = 1.5)
 
-# The second plot will be show the T0, Topt, and Tm for each population with the points and error bars as the mean and 95% credible intervals, respectively
+
+# Next we'll plot the estimates of T0, Topt, and Tm for each population with the points and error bars as the mean and 95% credible intervals, respectively
 # First I'm ordering populations based on the latitude of their collection site
 LatOrder = c("EUG", "HOP", "PLA", "MAR2", "MAR1", "JRA", "WAW", "PAR", "SB", "POW")
 LatColors = rep(rev(c("#ab041b", "#ec3c30", "#f46d43", "#fdae61", "#fee090", "#e0f3f8", "#abd9e9", "#74add1", "#4575b4", "#313695")), each = 3)
