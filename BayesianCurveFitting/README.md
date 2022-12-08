@@ -664,7 +664,7 @@ LDRdf_inf$Population = c(rep(c("HOP", "MAR1", "MAR2", "WAW", "EUG", "PLA", "SB",
 save(LDRdf_inf, file = "LDR_meansd_inf.Rsave")
 ```
 
-## 10. Plotting parameter estimates and thermal performance curves
+## 10. Plotting parameter estimates and thermal response curves
 
 Now lets visualize our beautiful thermal response curves and parameter estimates!
 First we'll plot the thermal response curves for each population.
