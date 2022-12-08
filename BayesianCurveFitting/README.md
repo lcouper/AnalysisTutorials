@@ -18,6 +18,8 @@ In this tutorial, we will go through the steps involved in fitting mosquito ther
 
 The data used in this tutorial can be found [here.](https://github.com/lcouper/AnalysisTutorials/blob/main/BayesianCurveFitting/LifeHistoryTraitExp_TutorialData.csv) 
 
+The script containing all code below with minimal commentary can be found in this folder as 'BayesianCurveFitting_AnalysisTutorial.R'
+
 Note this tutorial builds on code and approaches used by [Shocket et al. 2020](https://elifesciences.org/articles/58511) and [Mordecai et al. 2013](https://onlinelibrary.wiley.com/doi/abs/10.1111/ele.12015)[& 2017](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0005568). For more background on mosquito thermal biology and Bayesian curve fitting, see: [Mordecai et al. 2019. Ecology Letters.](https://onlinelibrary.wiley.com/doi/full/10.1111/ele.13335)
 
 ### 1. Loading data and libraries 
