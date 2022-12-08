@@ -671,11 +671,11 @@ save(LDRdf_inf, file = "LDR_meansd_inf.Rsave")
 ## 10. Plotting parameter estimates and thermal performance curves
 
 Now lets visualize our beautiful thermal response curves and parameter estimates!
+First we'll plot the thermal response curves for each population.
 
 ```{r, warning = FALSE}
 library(ggplot2)
 
-# First we'll plot the thermal response curves for each population:
 load("LDR_meansd_inf.Rsave") # to bypass above code of generating parameter estimates & credible intervals
 
 plot(LarvalDevRate ~ Temp.Treatment, 
@@ -692,10 +692,12 @@ lines(LDR.WAW.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.x
 lines(LDR.PAR.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#f46d43", lwd = 1.5)
 lines(LDR.SB.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#ec3c30", lwd = 1.5)
 lines(LDR.POW.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#ab041b", lwd = 1.5)
+```
 
 ![LDR TPC](./Figures/LDR_TPC.jpeg)
 
-# Next we'll plot the estimates of T0, Topt, and Tm for each population with the points and error bars as the mean and 95% credible intervals, respectively
+Next we'll plot the estimates of T0, Topt, and Tm for each population with the points and error bars as the mean and 95% credible intervals, respectively
+```{r, warning = FALSE}
 # First I'm ordering populations based on the latitude of their collection site
 LatOrder = c("EUG", "HOP", "PLA", "MAR2", "MAR1", "JRA", "WAW", "PAR", "SB", "POW")
 # I spent way too much time manually picking out these colors for each population, but use whatever color palette suits you! 
@@ -723,9 +725,9 @@ ggplot(LDRdf_inf, aes(x=Population, y=mean, col = LatColors)) +
         legend.title = element_text(size=16),
         plot.title = element_text(hjust = 0.5, size = 24),
         legend.position= "none") 
-        
+```       
 ![LDR params](./Figures/LDR_Params.jpeg)
-```
+
 
 
 
