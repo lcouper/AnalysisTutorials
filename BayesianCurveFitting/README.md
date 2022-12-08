@@ -161,7 +161,7 @@ LDR.HOP.out$BUGSoutput$summary[1:5,]
 # mcmcplot(LDR.HOP.prior.out) # To view model diagnostic plots (e.g., convergence, autocorrelation)
 ```
 
-#### ...and plot the raw data with the model fits. Here we're plotting the mean, 2.5%, and 97.5% quantiles for the predicted trait values across temperature
+#### ...and plot the raw data with the model fits. Here the solid and dashed lines are the mean, 2.5%, and 97.5% quantiles for the predicted trait values across temperature
 ```{r, fig = TRUE}
 plot(LarvalDevRate ~ Temp.Treatment, xlim = c(5, 45), ylim = c(0,0.12), data = data.LDR.HOP, ylab = "LDR for Hop", xlab = "Temperature")
 lines(LDR.HOP.out$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs)
