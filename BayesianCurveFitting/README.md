@@ -62,7 +62,6 @@ plot(LarvalDevRate ~ Temp.Treatment, xlim = c(5, 45), ylim = c(0,0.15), pch = 16
 
 ![Raw Trait Data](./Figures/Raw_Trait_Data.jpeg)
 
-
 The raw experimental data appears left-skewed, which is typical for rate traits of ectotherms such as development, fecundity, and biting. These are well described by Briere functions: 
 $$cT(T-T0)\sqrt{Tm−T}$$ 
 where T0 and Tm are the critical thermal minimum and maximum, respectively and c is a positive rate constant.
@@ -260,7 +259,10 @@ LDR.POW.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, m
                     n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
 ```
 
-Lets visually check the fits for each population by plotting the raw data and model fits :
+Lets visually check the fits for each population by plotting the raw data and model fits.
+
+![All Pops](./LDR_AllPops_Uniform_Fit.jpeg)
+
 ```{r, echo = FALSE, warning = FALSE}
 
 par(mfrow = c(5,2))
