@@ -3,7 +3,7 @@
 
 ## Overview
 
-In this tutorial, we will go through the steps involved in fitting Bayesian models to mosquito thermal performance curves. Specifically, we will fit temperature response functions to larval mosquito development rate ("LDR") for 10 populations of Aedes sierrensis, the western tree hole mosquito. The basic steps will involve:
+In this tutorial, we will go through the steps involved in fitting mosquito thermal response curves using Bayesian methods. Specifically, we will fit temperature response functions to larval mosquito development rate ("LDR") for 10 populations of Aedes sierrensis, the western tree hole mosquito. The basic steps will involve:
 
 1) Loading the data and libraries needed for analysis
 2) Plotting the raw data to determine the appropriate functional form to fit
@@ -13,7 +13,7 @@ In this tutorial, we will go through the steps involved in fitting Bayesian mode
 6) Generating informative priors using a leave-one-out approach
 7) Fitting using these informative priors
 8) Visually checking the model fits
-9) Calculating additional thermal performance characteristics
+9) Calculating additional thermal performance parameters
 10) Plotting thermal response curves and parameter estimates 
 
 The data used in this tutorial can be found [here.](https://github.com/lcouper/AnalysisTutorials/blob/main/BayesianCurveFitting/LifeHistoryTraitExp_TutorialData.csv) 
