@@ -698,6 +698,7 @@ lines(LDR.POW.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.x
 # Next we'll plot the estimates of T0, Topt, and Tm for each population with the points and error bars as the mean and 95% credible intervals, respectively
 # First I'm ordering populations based on the latitude of their collection site
 LatOrder = c("EUG", "HOP", "PLA", "MAR2", "MAR1", "JRA", "WAW", "PAR", "SB", "POW")
+# I spent way too much time manually picking out these colors for each population, but use whatever color palette suits you! 
 LatColors = rep(rev(c("#ab041b", "#ec3c30", "#f46d43", "#fdae61", "#fee090", "#e0f3f8", "#abd9e9", "#74add1", "#4575b4", "#313695")), each = 3)
 
 LDRdf_inf$Population = factor(LDRdf_inf$Population, levels = LatOrder)
@@ -706,9 +707,6 @@ LDRdf_inf = LDRdf_inf[order(LDRdf_inf$Population),]
 # But note that you could follow the below steps to create a similar plot for any individual or subset of the parameters
 LDRdf_inf = LDRdf_inf[LDRdf_inf$param != "Tbreadth",] 
 LDRdf_inf = LDRdf_inf[LDRdf_inf$param != "Pmax",]
-
-# I spent way too much time manually picking out these colors for each population, but use whatever color palette suits you! 
-colors3 = rep(rev(c("#a50026","#d73027","#f46d43","#fdae61","#fee090","#e0f3f8","#abd9e9","#74add1", "#4575b4","#313695")), each = 3)
 
 ggplot(LDRdf_inf, aes(x=Population, y=mean, col = LatColors)) + 
   scale_y_continuous(limits = c(0, 45)) +
