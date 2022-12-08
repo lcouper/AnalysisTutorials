@@ -692,7 +692,7 @@ lines(LDR.POW.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.x
 
 ![LDR TPC](./Figures/LDR_TPC.jpeg)
 
-Next we'll plot the estimates of T0, Topt, and Tm for each population with the points and error bars as the mean and 95% credible intervals, respectively
+Next we'll plot the estimates of T0, Topt, and Tm for each population with the points and error bars as the mean and 95% credible intervals, respectively.
 ```{r, warning = FALSE}
 # First I'm ordering populations based on the latitude of their collection site
 LatOrder = c("EUG", "HOP", "PLA", "MAR2", "MAR1", "JRA", "WAW", "PAR", "SB", "POW")
@@ -702,7 +702,7 @@ LatColors = rep(rev(c("#ab041b", "#ec3c30", "#f46d43", "#fdae61", "#fee090", "#e
 LDRdf_inf$Population = factor(LDRdf_inf$Population, levels = LatOrder)
 LDRdf_inf = LDRdf_inf[order(LDRdf_inf$Population),]
 # I'm removing the Tbreadth and Pmax parameters for now
-# But note that you could follow the below steps to create a similar plot for any individual or subset of the parameters
+# But note that you could follow the below steps to create a similar plot for any subset of the parameters
 LDRdf_inf = LDRdf_inf[LDRdf_inf$param != "Tbreadth",] 
 LDRdf_inf = LDRdf_inf[LDRdf_inf$param != "Pmax",]
 
