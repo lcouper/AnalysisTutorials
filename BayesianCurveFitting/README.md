@@ -260,9 +260,9 @@ Lets visually check the fits for each population by plotting the raw data and mo
 ![All Pops](./Figures/LDR_AllPops_Uniform_Fit.jpeg)
 
 ## 6. Generating informative priors using leave-one-out 
-The model fits shown in the plots above are quite good, but we can obtain more precise parameter estimates and thermal responses by using informative priors. Here, we'll generate informative priors using a 'leave-one-out' approach. For each population, our prior distributions will be based on the parameter estimates generating using low information priors for *the nine other populations*. 
+The model fits shown in the plots above are quite good, but we can obtain more precise parameter estimates and thermal responses by using informative priors. Here, we'll generate informative priors using a 'leave-one-out' approach. For each population, our prior distributions will be based on the parameter estimates generated using low information priors for *the nine other populations*. 
 
-First we subset the data, so that each subset excludes one population.
+First we subset the data, so that each subset excludes just one population.
 
 ```{r, warning = FALSE}
 data.LDR.HOP.prior <- subset(data.LDR, Population != "HOP")
