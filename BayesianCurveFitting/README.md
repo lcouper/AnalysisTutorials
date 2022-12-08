@@ -263,4 +263,172 @@ Lets visually check the fits for each population by plotting the raw data and mo
 
 ![All Pops](./Figures/LDR_AllPops_Uniform_Fit.jpeg)
 
+## 6. Generating informative priors using leave-one-out 
+The model fits shown in the plots above are quite good, but we can obtain more precise parameter estimates and thermal responses by using informative priors. Here, we'll generate informative priors using a 'leave-one-out' approach. For each population, our prior distributions will be based on the parameter estimates generating using low information priors for *the nine other populations*. 
 
+First we subset the data, so that each subset excludes one population.
+
+```{r, warning = FALSE}
+data.LDR.HOP.prior <- subset(data.LDR, Population != "HOP")
+data.LDR.MAR1.prior <- subset(data.LDR, Population != "MARIN35")
+data.LDR.MAR2.prior <- subset(data.LDR, Population != "MARIN29")
+data.LDR.WAW.prior <- subset(data.LDR, Population != "WAW")
+data.LDR.EUG.prior <- subset(data.LDR, Population != "EUG")
+data.LDR.PLA.prior <- subset(data.LDR, Population != "PLA")
+data.LDR.SB.prior <- subset(data.LDR, Population != "SB")
+data.LDR.JRA.prior <- subset(data.LDR, Population != "JRA")
+data.LDR.PAR.prior <- subset(data.LDR, Population != "PAR")
+data.LDR.POW.prior <- subset(data.LDR, Population != "POW")
+```
+Next we run the model fitting procedure as in step 5, using the same JAGS and MCMC settings, and save the output for later use.
+
+```{r, warning = FALSE}
+# HOP
+data <- data.LDR.HOP.prior
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data<-list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs)
+LDR.HOP.prior.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere.txt",
+                          n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# MAR1
+data <- data.LDR.MAR1.prior
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data<-list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs)
+LDR.MAR1.prior.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere.txt",
+                           n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# MAR2
+data <- data.LDR.MAR2.prior
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data<-list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs)
+LDR.MAR2.prior.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere.txt",
+                           n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# WAW
+data <- data.LDR.WAW.prior
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data<-list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs)
+LDR.WAW.prior.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere.txt",
+                          n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# EUG
+data <- data.LDR.EUG.prior
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data<-list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs)
+LDR.EUG.prior.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere.txt",
+                          n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# PLA
+data <- data.LDR.PLA.prior
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data<-list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs)
+LDR.PLA.prior.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere.txt",
+                          n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# SB
+data <- data.LDR.SB.prior
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data<-list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs)
+LDR.SB.prior.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere.txt",
+                         n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# JRA
+data <- data.LDR.JRA.prior
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data<-list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs)
+LDR.JRA.prior.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere.txt",
+                          n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# PAR
+data <- data.LDR.PAR.prior
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data<-list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs)
+LDR.PAR.prior.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere.txt",
+                          n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# POW
+data <- data.LDR.POW.prior
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data<-list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs)
+LDR.POW.prior.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere.txt",
+                          n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+```
+Now we'll save the posterior distributions of these parameters to use as our informative priors in the next step
+
+```{r, warning = FALSE}
+
+LDR.HOP.prior.cf.dists <- data.frame(q = as.vector(LDR.HOP.prior.out$BUGSoutput$sims.list$cf.q),
+                                     T0 = as.vector(LDR.HOP.prior.out$BUGSoutput$sims.list$cf.T0), 
+                                     Tm = as.vector(LDR.HOP.prior.out$BUGSoutput$sims.list$cf.Tm))
+LDR.HOP.prior.gamma.fits = apply(LDR.HOP.prior.cf.dists, 2, function(df) fitdistr(df, "gamma")$estimate)
+
+LDR.MAR1.prior.cf.dists <- data.frame(q = as.vector(LDR.MAR1.prior.out$BUGSoutput$sims.list$cf.q),
+                                      T0 = as.vector(LDR.MAR1.prior.out$BUGSoutput$sims.list$cf.T0), 
+                                      Tm = as.vector(LDR.MAR1.prior.out$BUGSoutput$sims.list$cf.Tm))
+LDR.MAR1.prior.gamma.fits = apply(LDR.MAR1.prior.cf.dists, 2, function(df) fitdistr(df, "gamma")$estimate)
+
+LDR.MAR2.prior.cf.dists <- data.frame(q = as.vector(LDR.MAR2.prior.out$BUGSoutput$sims.list$cf.q),
+                                      T0 = as.vector(LDR.MAR2.prior.out$BUGSoutput$sims.list$cf.T0), 
+                                      Tm = as.vector(LDR.MAR2.prior.out$BUGSoutput$sims.list$cf.Tm))
+LDR.MAR2.prior.gamma.fits = apply(LDR.MAR2.prior.cf.dists, 2, function(df) fitdistr(df, "gamma")$estimate)
+
+LDR.WAW.prior.cf.dists <- data.frame(q = as.vector(LDR.WAW.prior.out$BUGSoutput$sims.list$cf.q),
+                                     T0 = as.vector(LDR.WAW.prior.out$BUGSoutput$sims.list$cf.T0), 
+                                     Tm = as.vector(LDR.WAW.prior.out$BUGSoutput$sims.list$cf.Tm))
+LDR.WAW.prior.gamma.fits = apply(LDR.WAW.prior.cf.dists, 2, function(df) fitdistr(df, "gamma")$estimate)
+
+LDR.EUG.prior.cf.dists <- data.frame(q = as.vector(LDR.EUG.prior.out$BUGSoutput$sims.list$cf.q),
+                                     T0 = as.vector(LDR.EUG.prior.out$BUGSoutput$sims.list$cf.T0), 
+                                     Tm = as.vector(LDR.EUG.prior.out$BUGSoutput$sims.list$cf.Tm))
+LDR.EUG.prior.gamma.fits = apply(LDR.EUG.prior.cf.dists, 2, function(df) fitdistr(df, "gamma")$estimate)
+
+LDR.PLA.prior.cf.dists <- data.frame(q = as.vector(LDR.PLA.prior.out$BUGSoutput$sims.list$cf.q),
+                                     T0 = as.vector(LDR.PLA.prior.out$BUGSoutput$sims.list$cf.T0), 
+                                     Tm = as.vector(LDR.PLA.prior.out$BUGSoutput$sims.list$cf.Tm))
+LDR.PLA.prior.gamma.fits = apply(LDR.PLA.prior.cf.dists, 2, function(df) fitdistr(df, "gamma")$estimate)
+
+LDR.SB.prior.cf.dists <- data.frame(q = as.vector(LDR.SB.prior.out$BUGSoutput$sims.list$cf.q),
+                                    T0 = as.vector(LDR.SB.prior.out$BUGSoutput$sims.list$cf.T0), 
+                                    Tm = as.vector(LDR.SB.prior.out$BUGSoutput$sims.list$cf.Tm))
+LDR.SB.prior.gamma.fits = apply(LDR.SB.prior.cf.dists, 2, function(df) fitdistr(df, "gamma")$estimate)
+
+LDR.JRA.prior.cf.dists <- data.frame(q = as.vector(LDR.JRA.prior.out$BUGSoutput$sims.list$cf.q),
+                                     T0 = as.vector(LDR.JRA.prior.out$BUGSoutput$sims.list$cf.T0), 
+                                     Tm = as.vector(LDR.JRA.prior.out$BUGSoutput$sims.list$cf.Tm))
+LDR.JRA.prior.gamma.fits = apply(LDR.JRA.prior.cf.dists, 2, function(df) fitdistr(df, "gamma")$estimate)
+
+LDR.PAR.prior.cf.dists <- data.frame(q = as.vector(LDR.PAR.prior.out$BUGSoutput$sims.list$cf.q),
+                                     T0 = as.vector(LDR.PAR.prior.out$BUGSoutput$sims.list$cf.T0), 
+                                     Tm = as.vector(LDR.PAR.prior.out$BUGSoutput$sims.list$cf.Tm))
+LDR.PAR.prior.gamma.fits = apply(LDR.PAR.prior.cf.dists, 2, function(df) fitdistr(df, "gamma")$estimate)
+
+LDR.POW.prior.cf.dists <- data.frame(q = as.vector(LDR.POW.prior.out$BUGSoutput$sims.list$cf.q),
+                                     T0 = as.vector(LDR.POW.prior.out$BUGSoutput$sims.list$cf.T0), 
+                                     Tm = as.vector(LDR.POW.prior.out$BUGSoutput$sims.list$cf.Tm))
+LDR.POW.prior.gamma.fits = apply(LDR.POW.prior.cf.dists, 2, function(df) fitdistr(df, "gamma")$estimate)
+
+LDR.hypers <- list(LDR.HOP.prior.gamma.fits, LDR.MAR1.prior.gamma.fits, LDR.MAR2.prior.gamma.fits,
+                   LDR.WAW.prior.gamma.fits, LDR.EUG.prior.gamma.fits, LDR.PLA.prior.gamma.fits,
+                   LDR.SB.prior.gamma.fits, LDR.JRA.prior.gamma.fits, LDR.PAR.prior.gamma.fits, LDR.POW.prior.gamma.fits)
+save(LDR.hypers, file = "~/Documents/Current_Projects/LifeHistoryTraitExp/Analysis_TraitFits/LDRhypers.Rsave")
+```
