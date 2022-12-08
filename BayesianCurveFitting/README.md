@@ -261,7 +261,7 @@ LDR.POW.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, m
 
 Lets visually check the fits for each population by plotting the raw data and model fits.
 
-![All Pops](./LDR_AllPops_Uniform_Fit.jpeg)
+![All Pops](./Figures/LDR_AllPops_Uniform_Fit.jpeg)
 
 ```{r, echo = FALSE, warning = FALSE}
 
