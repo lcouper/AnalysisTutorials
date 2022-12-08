@@ -74,8 +74,8 @@ We are using this approach to estimate T0, Tm, and c (the critical thermal minim
 In the set-up, we: 
 
 1) Specify the priors -- a probability distribution capturing our beliefs about what the parameters may be, using our knowledge of the system. In the first round of model fitting, we are using 'low information' priors. These are uniform priors bounded by biologically realistic temperature constraints. For T0, we set these bounds to be 0-20&deg;C, meaning the probability distribution will only take on values in this range, and all values within this range are equally likely. For Tm, we set the bounds as 28-35&deg;C. These bounds were based on prior experiments and information from other mosquito species. We also specify sigma and tau, which expresses the standard deviation used when making trait predictions.
-2) Specify the likelihood function, which specifies how the raw data link to the parameters you are trying to estimate. Here, we use the Briere function from above, and set trait performance to 0 if  T0 > T > Tm.
-3) Specify any additional quantities we want the model to estimate, which for us are the predicted trait values at other temperatures. This will enable us to generate a continuous thermal performance curve, from experimental trait data measured at 6 temperatures.
+2) Specify the likelihood function, which defines how the raw data link to the parameters you are trying to estimate. Here, we use the Briere function from above, and set trait performance to 0 if  T0 > T > Tm.
+3) Specify any additional quantities we want the model to estimate, which for us are the predicted trait values across a sequence of temperatures. This will enable us to generate a continuous thermal performance curve from experimental trait data measured at 6 temperatures.
 
 ```{r, results = 'hide'}
 {
