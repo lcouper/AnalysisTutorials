@@ -164,12 +164,13 @@ LDR.HOP.out$BUGSoutput$summary[1:5,]
 ```
 
 #### ...and plot the raw data with the model fits. Here we're plotting the mean, 2.5%, and 97.5% quantiles for the predicted trait values across temperature
-```{r}
+```{r, fig = TRUE}
 plot(LarvalDevRate ~ Temp.Treatment, xlim = c(5, 45), ylim = c(0,0.12), data = data.LDR.HOP, ylab = "LDR for Hop", xlab = "Temperature")
 lines(LDR.HOP.out$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs)
 lines(LDR.HOP.out$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "2.5%"] ~ Temp.xs, lty = 2)
 lines(LDR.HOP.out$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "97.5%"] ~ Temp.xs, lty = 2)
 ```
+
 
 The model fit appears to describe the raw data well for this trait and population.
 
