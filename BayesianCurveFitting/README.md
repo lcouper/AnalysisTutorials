@@ -1,10 +1,6 @@
 
 # Tutorial on Bayesian Curve Fitting 
 
-```{r, setup, include=FALSE}
-knitr::opts_knit$set(root.dir = '~/Documents/Current_Projects/LifeHistoryTraitExp/Analysis_TraitFits')
-```
-
 ## Overview
 
 In this tutorial, we will go through the steps involved in fitting Bayesian models to mosquito thermal performance curves. Specifically, we will fit temperature response functions to larval mosquito development rate ("LDR") for 10 populations of Aedes sierrensis, the western tree hole mosquito. The basic steps will involve:
@@ -26,10 +22,11 @@ Note this tutorial builds on code and approaches used by [Shocket et al. 2020](h
 
 ### 1. Loading data and libraries 
 
-```{r, warning = FALSE, message = FALSE}
-# Set working directory (Note: this will differ for you. Just make sure it matches where you downloaded the data)
-setwd("~/Documents/Current_Projects/LifeHistoryTraitExp/Analysis_TraitFits")
-
+```{r setup, include=FALSE, warning = FALSE, message = FALSE}
+# Set working directory. (Note: this will differ for you. Just make sure it matches where you downloaded the data)
+knitr::opts_knit$set(root.dir = '~/Documents/Current_Projects/LifeHistoryTraitExp/Analysis_TraitFits')
+```
+```{r}
 # Load libraries for fitting traits
 library('R2jags')
 library('mcmcplots')
