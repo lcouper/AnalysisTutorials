@@ -60,7 +60,8 @@ plot(LarvalDevRate ~ Temp.Treatment, xlim = c(5, 45), ylim = c(0,0.15), pch = 16
      data = data.LDR, ylab = "Larval dev rate", xlab = "Temperature")
 ```
 
-![LDR fit](./Figures/LDR_Hopland_Uniform_Fit.jpeg)
+![Raw Trait Data](./Figures/Raw_Trait_Data.jpeg)
+
 
 The raw experimental data appears left-skewed, which is typical for rate traits of ectotherms such as development, fecundity, and biting. These are well described by Briere functions: 
 $$cT(T-T0)\sqrt{Tm−T}$$ 
@@ -172,7 +173,7 @@ lines(LDR.HOP.out$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs)
 lines(LDR.HOP.out$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "2.5%"] ~ Temp.xs, lty = 2)
 lines(LDR.HOP.out$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "97.5%"] ~ Temp.xs, lty = 2)
 ```
-
+![LDR fit](./Figures/LDR_Hopland_Uniform_Fit.jpeg)
 
 The model fit appears to describe the raw data well for this trait and population.
 
