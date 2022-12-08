@@ -593,7 +593,7 @@ The model appears to fit the data well for each population. Note the difference 
 
 ## 9. Calculating additional thermal performance characteristics
 
-We have obtained estimates for T0 and Tm. But we may also be interested in Topt (the temperature at max trait performance), Pmax (the max trait performance), and Tbreadth (the range at which trait values are >= 50% of the max). Below we will define functions to calculate each of these parameters. Note that you could follow a similar procedure to characterize other features of the thermal response.
+We have obtained estimates for T0 and Tm. But we may also be interested in other parameters such as Topt (the temperature at max trait performance), Pmax (the max trait performance), and Tbreadth (the range at which trait performance is >= 50% of the max). Below we will define functions to calculate each of these parameters. Note that you could follow a similar procedure to characterize other features of the thermal response.
 
 ```{r, warning = FALSE}
 # Function to calculate Topt of LDR for each population
