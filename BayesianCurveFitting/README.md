@@ -60,6 +60,8 @@ plot(LarvalDevRate ~ Temp.Treatment, xlim = c(5, 45), ylim = c(0,0.15), pch = 16
      data = data.LDR, ylab = "Larval dev rate", xlab = "Temperature")
 ```
 
+![LDR fit](./Figures/LDR_Hopland_Uniform_Fit.jpeg)
+
 The raw experimental data appears left-skewed, which is typical for rate traits of ectotherms such as development, fecundity, and biting. These are well described by Briere functions: 
 $$cT(T-T0)\sqrt{Tm−T}$$ 
 where T0 and Tm are the critical thermal minimum and maximum, respectively and c is a positive rate constant.
