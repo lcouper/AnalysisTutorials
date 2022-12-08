@@ -466,7 +466,7 @@ sink()
 Now we'll load the informative priors...
 
 ```{r, warning = FALSE}
-# To bypass the above code where we generated the informative priors, you can load the saved hyperparameters:
+# By saving and loading hyperparameters, we can bypass Step 6 of generating the informative priors in the future
 load("LDRhypers.Rsave")
 LDR.HOP.prior.gamma.fits <- LDR.hypers[[1]]
 LDR.MAR1.prior.gamma.fits <- LDR.hypers[[2]]
