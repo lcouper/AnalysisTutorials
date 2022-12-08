@@ -255,7 +255,7 @@ LDR.POW.out <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, m
                     n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
 ```
 
-Lets visually check the fits for each population by plotting the raw data and model fits.
+Lets visually check the fits for each population by plotting the raw data and model output (again the mean, 2.5% and 97.5% quantiles).
 
 ![All Pops](./Figures/LDR_AllPops_Uniform_Fit.jpeg)
 
