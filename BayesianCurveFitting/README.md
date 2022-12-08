@@ -434,7 +434,7 @@ We'll now use the informative priors  generated above and repeat the model fitti
 Before getting to this, we must first update the JAGS file specifying our gamma-distributed informative priors. 
 
 ```{r, results = 'hide'}
-{ setwd("~/Documents/Current_Projects/LifeHistoryTraitExp/Analysis_TraitFits")
+{ 
 sink("briere_inf.txt")
 cat("
     model{
