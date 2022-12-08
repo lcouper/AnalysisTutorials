@@ -432,3 +432,298 @@ LDR.hypers <- list(LDR.HOP.prior.gamma.fits, LDR.MAR1.prior.gamma.fits, LDR.MAR2
                    LDR.SB.prior.gamma.fits, LDR.JRA.prior.gamma.fits, LDR.PAR.prior.gamma.fits, LDR.POW.prior.gamma.fits)
 save(LDR.hypers, file = "~/Documents/Current_Projects/LifeHistoryTraitExp/Analysis_TraitFits/LDRhypers.Rsave")
 ```
+
+## 7. Fitting using informative priors 
+We'll now use the informative priors  generated above and repeat the model fitting procedure for each population. Specifically, we'll fit a gamma distribution to the posterior distribution of each parameter (T0, Tm, c) for each of the leave-one-out groups. We will use this gamma distribution as our priors in this step. We can adjust the 'weighting' of these priors based on the model fits. That is, if the priors appear to be too strongly affecting the shape of the curve and don't match the raw data well, we can down weight the priors, which essentially increases their variance and reduces their effect on the posterior distribution.
+Before getting to this, we must first update the JAGS file specifying our gamma-distributed informative priors. 
+
+```{r, results = 'hide'}
+{ setwd("~/Documents/Current_Projects/LifeHistoryTraitExp/Analysis_TraitFits")
+sink("briere_inf.txt")
+cat("
+    model{
+    
+    # 1. Specify the informative priors as gamma distributed
+    cf.q ~ dgamma(hypers[1,1], hypers[2,1]) 
+    cf.T0 ~ dgamma(hypers[1,2], hypers[2,2])
+    cf.Tm ~ dgamma(hypers[1,3], hypers[2,3])
+    cf.sigma ~ dunif(0, 1000)
+    cf.tau <- 1 / (cf.sigma * cf.sigma)
+    
+    # 2. Specify the Likelihood function (here, Briere)
+    for(i in 1:N.obs){
+    trait.mu[i] <- cf.q * temp[i] * (temp[i] - cf.T0) * sqrt((cf.Tm - temp[i]) * (cf.Tm > temp[i])) * (cf.T0 < temp[i])
+    trait[i] ~ dnorm(trait.mu[i], cf.tau)
+    }
+    
+    # 3. Specify the Derived Quantities and Predictions
+    for(i in 1:N.Temp.xs){
+    z.trait.mu.pred[i] <- cf.q * Temp.xs[i] * (Temp.xs[i] - cf.T0) * sqrt((cf.Tm - Temp.xs[i]) * (cf.Tm > Temp.xs[i])) * (cf.T0 < Temp.xs[i])
+    }
+    
+    } # close model
+    ",fill=T)
+sink()
+}
+```
+
+Now we'll load the informative priors...
+
+```{r, warning = FALSE}
+# To bypass the above code where we generated the informative priors, you can load the saved hyperparameters:
+load("LDRhypers.Rsave")
+LDR.HOP.prior.gamma.fits <- LDR.hypers[[1]]
+LDR.MAR1.prior.gamma.fits <- LDR.hypers[[2]]
+LDR.MAR2.prior.gamma.fits <- LDR.hypers[[3]]
+LDR.WAW.prior.gamma.fits <- LDR.hypers[[4]]
+LDR.EUG.prior.gamma.fits <- LDR.hypers[[5]]
+LDR.PLA.prior.gamma.fits <- LDR.hypers[[6]]
+LDR.SB.prior.gamma.fits <- LDR.hypers[[7]]
+LDR.JRA.prior.gamma.fits <- LDR.hypers[[8]]
+LDR.PAR.prior.gamma.fits <- LDR.hypers[[9]]
+LDR.POW.prior.gamma.fits <- LDR.hypers[[10]]
+```
+
+... and perform the model fitting procedure for each population
+
+```{r, warning = FALSE}
+# HOP
+data <- data.LDR.HOP
+hypers <- LDR.HOP.prior.gamma.fits * 0.1 # Note this is where you can adjust the weight of the priors. Decreasing this value (e.g., to '0.01' will increase the variance of the priors and reduce their effect on the posterior distribution)
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data <- list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs, hypers = hypers)
+LDR.HOP.out.inf <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere_inf.txt",
+                        n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# MAR1
+data <- data.LDR.MAR1
+hypers <- LDR.MAR1.prior.gamma.fits * 0.1
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data <- list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs, hypers = hypers)
+LDR.MAR1.out.inf <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere_inf.txt",
+                         n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# MAR2
+data <- data.LDR.MAR2
+hypers <- LDR.MAR2.prior.gamma.fits * 0.1
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data <- list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs, hypers = hypers)
+LDR.MAR2.out.inf <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere_inf.txt",
+                         n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# WAW
+data <- data.LDR.WAW
+hypers <- LDR.WAW.prior.gamma.fits * 0.1
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data <- list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs, hypers = hypers)
+LDR.WAW.out.inf <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere_inf.txt",
+                        n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# EUG
+data <- data.LDR.EUG
+hypers <- LDR.EUG.prior.gamma.fits * 0.1
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data <- list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs, hypers = hypers)
+LDR.EUG.out.inf <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere_inf.txt",
+                        n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# PLA
+data <- data.LDR.PLA
+hypers <- LDR.PLA.prior.gamma.fits * 0.1
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data <- list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs, hypers = hypers)
+LDR.PLA.out.inf <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere_inf.txt",
+                        n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# SB
+data <- data.LDR.SB
+hypers <- LDR.SB.prior.gamma.fits * 0.1
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data <- list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs, hypers = hypers)
+LDR.SB.out.inf <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere_inf.txt",
+                       n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# JRA
+data <- data.LDR.JRA
+hypers <- LDR.JRA.prior.gamma.fits * 0.1
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data <- list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs, hypers = hypers)
+LDR.JRA.out.inf <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere_inf.txt",
+                        n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# PAR
+data <- data.LDR.PAR
+hypers <- LDR.PAR.prior.gamma.fits * 0.1
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data <- list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs, hypers = hypers)
+LDR.PAR.out.inf <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere_inf.txt",
+                        n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+
+# POW
+data <- data.LDR.POW
+hypers <- LDR.POW.prior.gamma.fits * 0.1
+trait <- data$LarvalDevRate
+N.obs <- length(trait)
+temp <- data$Temp.Treatment
+jag.data <- list(trait = trait, N.obs = N.obs, temp = temp, Temp.xs = Temp.xs, N.Temp.xs = N.Temp.xs, hypers = hypers)
+LDR.POW.out.inf <- jags(data=jag.data, inits=inits, parameters.to.save=parameters, model.file="briere_inf.txt",
+                        n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, DIC=T, working.directory=getwd())
+```
+
+## 8. Checking model fits 
+As before, lets check the model fits for each population by plotting the raw data along with the mean, 2.5% and 97.5% quantiles for the predicted trait values at each temperature
+
+![All Pops Informative](./Figures/LDR_AllPops_Informative_Fit.jpeg)
+
+The model appears to fit the data well for each population. 
+
+## 9. Calculating additional thermal performance characteristics
+
+We have obtained estimates for T0 and Tm. But we may also be interested in Topt (the temperature at max trait performance), Pmax (the max trait performance), and Tbreadth (the range at which trait values are >= 50% of the max). Below we will define functions to calculate each of these parameters. Note that you could follow a similar procedure to characterize other features of the thermal response.
+
+```{r, warning = FALSE}
+# Function to calculate Topt of LDR for each population
+
+Topt = function(x) {
+  Matrix = x[["BUGSoutput"]][["sims.matrix"]]
+  ToptVec = rep(NA, nrow(Matrix))
+  for (i in 1:nrow(Matrix))
+  {ToptVec[i] = Temp.xs[which.max(Matrix[i,6:86])]}
+  return(c(mean(ToptVec), quantile(ToptVec, c(0.025, 0.975))))
+}
+
+# Function to calculate Pmax of LDR for each population ######
+
+Pmax = function(x) {
+  Matrix = x[["BUGSoutput"]][["sims.matrix"]]
+  PmaxVec = rep(NA, nrow(Matrix))
+  for (i in 1:nrow(Matrix))
+  {PmaxVec[i] = max(Matrix[i,6:86])}
+  return(c(mean(PmaxVec), quantile(PmaxVec, c(0.025, 0.975))))
+}
+
+# Function to calculate Tbreadth for each population #####
+
+# Tbreadth defined as the temperature range where 
+# performance remains >= 50% peak performance
+
+Tbreadth = function(x) {
+  Matrix = x[["BUGSoutput"]][["sims.matrix"]]
+  TbreadthVec = rep(NA, nrow(Matrix))
+  for (i in 1:nrow(Matrix))
+  {fiftypeak = (max(Matrix[i,6:86])/2)
+  fiftypeakindexes = which(Matrix[i,6:86] >= fiftypeak)
+  mintempindex = fiftypeakindexes[1]
+  maxtempindex = fiftypeakindexes[length(fiftypeakindexes)]
+  TbreadthVec[i] = Temp.xs[maxtempindex] - Temp.xs[mintempindex]
+  }
+  return(c(mean(TbreadthVec), quantile(TbreadthVec, c(0.025, 0.975))))
+}
+```
+Now lets compile all these predictions in a dataframe and save them
+
+```{r,warning = FALSE}
+# Function to compile mean & 95% credible intervals for all parameters for each population 
+ParamCompile = function(x){
+  DF = as.data.frame(matrix(,nrow = 5, ncol =4))
+  colnames(DF) = c("mean", "lower95", "upper95", "param")
+  DF[,4] = c("Tmin", "Tmax", "Topt", "Tbreadth", "Pmax")
+  DF[1,1] = x$BUGSoutput$summary[1,1]
+  DF[1,2:3] = hdi(x$BUGSoutput$sims.list$cf.T0, 0.95)[c(1,2)]
+  DF[2,1] = x$BUGSoutput$summary[2,1]
+  DF[2,2:3] = hdi(x$BUGSoutput$sims.list$cf.Tm, 0.95)[c(1,2)]
+  DF[3,1:3] = as.numeric(Topt(x))
+  DF[4,1:3] = as.numeric(Tbreadth(x))
+  DF[5,1:3] = as.numeric(Pmax(x))
+  return(DF)
+}
+
+# Store in a single dataframe
+LDRdf_inf <- rbind.data.frame(ParamCompile(LDR.HOP.out.inf), ParamCompile(LDR.MAR1.out.inf),
+                              ParamCompile(LDR.MAR2.out.inf), ParamCompile(LDR.WAW.out.inf),
+                              ParamCompile(LDR.EUG.out.inf), ParamCompile(LDR.PLA.out.inf),
+                              ParamCompile(LDR.SB.out.inf), ParamCompile(LDR.JRA.out.inf),
+                              ParamCompile(LDR.PAR.out.inf), ParamCompile(LDR.POW.out.inf))
+# Append the population names
+LDRdf_inf$Population = c(rep(c("HOP", "MAR1", "MAR2", "WAW", "EUG", "PLA", "SB", "JRA", "PAR", "POW"), each = 5))
+# Save for later use
+save(LDRdf_inf, file = "LDR_meansd_inf.Rsave")
+```
+
+## 10. Plotting parameter estimates and thermal performance curves
+
+Now lets visualize our beautiful thermal response curves and parameter estimates!
+
+```{r, warning = FALSE}
+library(ggplot2)
+
+# The first plot will be the thermal response curves for each population:
+load("LDR_meansd_inf.Rsave") # to bypass above code of generating parameter estimates & credible intervals
+
+plot(LarvalDevRate ~ Temp.Treatment, 
+     xlim = c(5, 45), ylim = c(0,0.11), data = data.LDR.HOP, type = "n", bty = "n",
+     ylab = "rate (1/day)", xlab = "Temperature (\u00B0C)", pch = 1,
+     main = "Larval development rates", cex.main = 2, cex.lab = 1.4, cex.axis = 1.2)
+lines(LDR.EUG.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#313695", lwd = 1.5)
+lines(LDR.HOP.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#4575b4", lwd = 1.5)
+lines(LDR.PLA.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#74add1", lwd = 1.5)
+lines(LDR.MAR2.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#abd9e9", lwd = 1.5)
+lines(LDR.MAR1.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#e0f3f8", lwd = 1.5)
+lines(LDR.JRA.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#fee090", lwd = 1.5)
+lines(LDR.WAW.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#fdae61", lwd = 1.5)
+lines(LDR.PAR.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#f46d43", lwd = 1.5)
+lines(LDR.SB.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#ec3c30", lwd = 1.5)
+lines(LDR.POW.out.inf$BUGSoutput$summary[6:(6 + N.Temp.xs - 1), "mean"] ~ Temp.xs, col = "#ab041b", lwd = 1.5)
+
+# The second plot will be show the T0, Topt, and Tm for each population with the points and error bars as the mean and 95% credible intervals, respectively
+# First I'm ordering populations based on the latitude of their collection site
+LatOrder = c("EUG", "HOP", "PLA", "MAR2", "MAR1", "JRA", "WAW", "PAR", "SB", "POW")
+LatColors = rep(rev(c("#ab041b", "#ec3c30", "#f46d43", "#fdae61", "#fee090", "#e0f3f8", "#abd9e9", "#74add1", "#4575b4", "#313695")), each = 3)
+
+LDRdf_inf$Population = factor(LDRdf_inf$Population, levels = LatOrder)
+LDRdf_inf = LDRdf_inf[order(LDRdf_inf$Population),]
+# I'm removing the Tbreadth and Pmax parameters for now
+# But note that you could follow the below steps to create a similar plot for any individual or subset of the parameters
+LDRdf_inf = LDRdf_inf[LDRdf_inf$param != "Tbreadth",] 
+LDRdf_inf = LDRdf_inf[LDRdf_inf$param != "Pmax",]
+
+# I spent way too much time manually picking out these colors for each population, but use whatever color palette suits you! 
+colors3 = rep(rev(c("#a50026","#d73027","#f46d43","#fdae61","#fee090","#e0f3f8","#abd9e9","#74add1", "#4575b4","#313695")), each = 3)
+
+ggplot(LDRdf_inf, aes(x=Population, y=mean, col = LatColors)) + 
+  scale_y_continuous(limits = c(0, 45)) +
+  geom_point(stat="identity", col=LatColors, 
+             position=position_dodge(width = 1)) +
+  geom_errorbar(aes(ymin=lower95, ymax=upper95), col = LatColors,
+                position=position_dodge(.9), width = 0.3) + 
+  ggtitle("Larval dev rates (1/day)") + 
+  theme_minimal() +  coord_flip()  + 
+  labs(x = "Population", y = "Temperature (C)") + 
+  theme(axis.text=element_text(size=15), 
+        axis.title = element_text(size = 16),
+        legend.text=element_text(size=15),
+        legend.title = element_text(size=16),
+        plot.title = element_text(hjust = 0.5, size = 24),
+        legend.position= "none") 
+```
+
+
+
