@@ -79,7 +79,6 @@ In the set-up, we:
 
 ```{r, results = 'hide'}
 {
-  setwd("~/Documents/Current_Projects/LifeHistoryTraitExp/Analysis_TraitFits")
   sink("briere.txt") # This drives the text below to a text file, which will be saved in your working directory
 cat("
     model{  
@@ -87,11 +86,11 @@ cat("
     # 1. Specify the Priors
     cf.q ~ dunif(0, 1) # c = a positive rate constant
     cf.T0 ~ dunif(0, 20) 
-    cf.Tm ~ dunif(28, 35) # 35 set based on highest CTmax for larval survival
+    cf.Tm ~ dunif(28, 35) # 35 set based on prior experiments on larval survival
     cf.sigma ~ dunif(0, 1000) # standard deviation 
     cf.tau <- 1 / (cf.sigma * cf.sigma)
     
-    # 2. Specify the Likelihood function (here, Briere)
+    # 2. Specify the Likelihood function (here, Briere. Note the last two terms are to set performance to 0 if Tm < T < T0)
     for(i in 1:N.obs){
     trait.mu[i] <- cf.q * temp[i] * (temp[i] - cf.T0) * sqrt((cf.Tm - temp[i]) * (cf.Tm > temp[i])) * (cf.T0 < temp[i])
     trait[i] ~ dnorm(trait.mu[i], cf.tau) # trait values drawn from normal dist with variance from ct tau
