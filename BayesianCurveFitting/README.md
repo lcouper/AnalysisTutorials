@@ -589,7 +589,7 @@ As before, lets check the model fits for each population by plotting the raw dat
 
 ![All Pops Informative](./Figures/LDR_AllPops_Informative_Fit.jpeg)
 
-The model appears to fit the data well for each population. 
+The model appears to fit the data well for each population. Note the difference in model fit and uncertainty is most apparent for 'EUG', which was the population with the smallest sample size in the experiment.
 
 ## 9. Calculating additional thermal performance characteristics
 
