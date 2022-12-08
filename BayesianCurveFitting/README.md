@@ -109,7 +109,7 @@ sink()
 
 ### 4. Setting up the MCMC simulation
 
-Next we set-up the Markov Chain Monte Carlo sampler. This is a way to *approximate* the posterior distribution when you can't solve for it analytically (i.e., because the shape of the prior and likelihood distributions are funky and can't be easily combined). The way the simulation works is it start with some initial parameter value, for example '32&deg;C' for Tm. Then it picks another random parameter value, compares it with the previous one, and keeps whichever has the *higher likelihood* of being in the posterior distribution. This value gets added to the 'chain', and the process is repeated for as many iterations as you specify. Eventually your chain will converge on a single parameter value. We 'burn-in', or drop from the chain, some number of initial entries in the chain, as these are more heavily influenced by our choice of initial value, which we don't want. We can also 'thin' our chain by removing every nth value. This can help reduce the autocorrelation of points in the chain, since each point depends on the prior point. You can also repeat this process several times (i.e., build multiple chains), which will help with model convergence and enable more precise parameter estimates.
+Next we set-up the Markov Chain Monte Carlo sampler. This is a way to *approximate* the posterior distribution when you can't solve for it analytically (i.e., because the shape of the prior and likelihood distributions are funky and can't be easily combined). The way the simulation works is it start with some initial parameter value, for example '32&deg;C' for Tm. Then it picks another random parameter value, compares it with the previous one, and keeps whichever has the *higher likelihood* of being in the posterior distribution. This value gets added to the 'chain', and the process is repeated for as many iterations as you specify. Eventually your chain will converge on a single parameter value. We 'burn-in', or drop from the chain, some number of initial entries in the chain, as these are more heavily influenced by our choice of initial value, which we don't want. We can also 'thin' our chain by saving every nth iteration in the chain. This can help reduce the autocorrelation of points in the chain, since each point depends on the prior point. You can also repeat this process several times (i.e., build multiple chains), which will help with model convergence and enable more precise parameter estimates.
 
 ```{r, results = 'hide'}
 # For each parameter, we specify the initial values to use in the MCMC simulation
@@ -125,7 +125,7 @@ parameters <- c("cf.q", "cf.T0", "cf.Tm","cf.sigma", "z.trait.mu.pred")
 # Specify the MCMC settings 
 ni <- 25000 # number of iterations in each chain
 nb <- 5000 # number of 'burn in' iterations to discard
-nt <- 8 # thinning rate - jags saves every nth iterations in each chain
+nt <- 8 # thinning rate - save every nth iteration in each chain
 nc <- 3 # number of chains
 
 # Temperature sequence for derived quantity calculations
