@@ -69,7 +69,7 @@ $$-c(T–T0)(T–Tm))$$
 ### 3. Setting up the JAGS model
 
 Next we set-up the JAGS ('Just Another Gibbs Sampler') model, which we will use to run Bayesian models using simulation.
-We are using this approach to estimate T0, Tm, and c (the critical thermal minimum, maximum, and rate constant shown in the equation above, and predicted trait values, needed to generate continuous thermal response curves.
+We are using this approach to estimate T0, Tm, and c (the critical thermal minimum, maximum, and rate constant) shown in the equation above, and predicted trait values, needed to generate continuous thermal response curves.
 
 In the set-up, we: 
 
