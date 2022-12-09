@@ -20,7 +20,7 @@ The data used in this tutorial can be found [here.](https://github.com/lcouper/A
 
 The script containing all code below with minimal commentary can be found in this folder as 'BayesianCurveFitting_AnalysisTutorial.R'
 
-Note this tutorial builds on code and approaches used by [Shocket et al. 2020](https://elifesciences.org/articles/58511) and [Mordecai et al. 2013](https://onlinelibrary.wiley.com/doi/abs/10.1111/ele.12015)[& 2017](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0005568). For more background on mosquito thermal biology and Bayesian curve fitting, see: [Mordecai et al. 2019. Ecology Letters](https://onlinelibrary.wiley.com/doi/full/10.1111/ele.13335). For more information on MCMC sampling, see : [Ravenzwaaij et al. 2018](https://link.springer.com/article/10.3758/s13423-016-1015-8). Thank you to Mordecai lab members, particularly Mauricio Loya and Marta Shocket for help learning these methods.
+Note this tutorial builds on code and approaches used by [Shocket et al. 2020](https://elifesciences.org/articles/58511) and [Mordecai et al. 2013](https://onlinelibrary.wiley.com/doi/abs/10.1111/ele.12015) [& 2017](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0005568). For more background on mosquito thermal biology and Bayesian curve fitting, see: [Mordecai et al. 2019. Ecology Letters](https://onlinelibrary.wiley.com/doi/full/10.1111/ele.13335). For more information on MCMC sampling, see : [Ravenzwaaij et al. 2018](https://link.springer.com/article/10.3758/s13423-016-1015-8). Thank you to Mordecai lab members, particularly Mauricio Loya and Marta Shocket for help learning these methods.
 
 ### 1. Loading data and libraries 
 
