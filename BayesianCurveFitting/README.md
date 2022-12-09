@@ -20,7 +20,7 @@ The data used in this tutorial can be found [here.](https://github.com/lcouper/A
 
 The script containing all code below with minimal commentary can be found in this folder as 'BayesianCurveFitting_AnalysisTutorial.R'
 
-Note this tutorial builds on code and approaches used by [Shocket et al. 2020](https://elifesciences.org/articles/58511) and [Mordecai et al. 2013](https://onlinelibrary.wiley.com/doi/abs/10.1111/ele.12015)[& 2017](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0005568). For more background on mosquito thermal biology and Bayesian curve fitting, see: [Mordecai et al. 2019. Ecology Letters.](https://onlinelibrary.wiley.com/doi/full/10.1111/ele.13335)
+Note this tutorial builds on code and approaches used by [Shocket et al. 2020](https://elifesciences.org/articles/58511) and [Mordecai et al. 2013](https://onlinelibrary.wiley.com/doi/abs/10.1111/ele.12015)[& 2017](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0005568). For more background on mosquito thermal biology and Bayesian curve fitting, see: [Mordecai et al. 2019. Ecology Letters.](https://onlinelibrary.wiley.com/doi/full/10.1111/ele.13335). For more information on MCMC sampling, see : [Ravenzwaaij et al. 2018](https://link.springer.com/article/10.3758/s13423-016-1015-8). Credit to Mordecai lab members, particularly Mauricio Loya and Marta Shocket for help learning these methods.
 
 ### 1. Loading data and libraries 
 
@@ -112,6 +112,7 @@ sink()
 ### 4. Setting up the MCMC simulation
 
 Next we set-up the Markov Chain Monte Carlo sampler. This is a way to *approximate* the posterior distribution when you can't solve for it analytically (i.e., because the shape of the prior and likelihood distributions are funky and can't be easily combined). The way the simulation works is it starts with some initial parameter value, for example '32&deg;C' for Tm. Then it 'moves' to another parameter value, for example '34&deg;C'. If the second value (e.g., 34&deg;C) has a *higher* probability of being in the posterior distribution, then it is added to the chain. If it has a *lower* probability, then the algorithm randomly chooses to accept or reject it by comparing their probabilities of being in the posterior distribution (e.g., if the height of the posterior distribution at the 34&deg;C value is 1/3 as high as that of the prior value, 32&deg;C, it has a 1/3 chance of being kept). Either the new value or the most recent value is then added to the 'chain', and the process is repeated for as many iterations as you specify. By running the chain for many iterations, we hope to converge on a distribution that approximates the posterior distribution. We 'burn-in', or drop from the chain, some number of initial entries in the chain, as these are more heavily influenced by our choice of initial value, which we don't want. We can also 'thin' our chain by saving every nth iteration in the chain. This can help reduce the autocorrelation of points in the chain, since each point depends on the prior point. You can also repeat this process several times (i.e., build multiple chains), which will help with model convergence and enable more precise parameter estimates.
+
 
 ```{r, results = 'hide'}
 # For each parameter, we specify the initial values to use in the MCMC simulation
