@@ -6,20 +6,21 @@ The code and description below outlines the steps for conducting a regression us
 2. Setting up the regression model
 3. Visualizing output
 
-The dataset used here ('MosquitoAbundance_PanelData') pertains to observations of various mosquito species across California counties from 2012 - 2020, as well as cases of dog heartworm for those counties and years.
+The dataset used here ('MosquitoAbundance_PanelData') pertains to observations of various mosquito species across California counties from 2012 - 2020, as well as cases of dog heartworm for those counties and years. We are using a panel regression approach to investigate whether variation in the abundance of any particular mosquito species is associated with variation in dog heartworm cases.
 
 #### 1. Load packages and data ####
-
+```
 library(data.table)
 library(mltools)
 
 setwd("~/PanelRegression")
 data = read.csv("MosquitoAbundance_PanelData.csv", header =T)[,-1]
-
+```
 #### 2. Separate data into bioregions #####
 
 Given broad climatic and ecological differences between California bioregions, we may want to run separate regressions for each. Here, we separate out data into Northern, Central, and Southern bioregions:
 
+```
 NorthBior = c("BayDelta", "Klamath", "Sierra", "SacramentoValley")
 DataCentral =  DataA2[DataA2$Bioregion %in% CentralBior, ]
 SouthBior = c("SouthCoast", "ColoradoDesert")
@@ -27,23 +28,26 @@ SouthBior = c("SouthCoast", "ColoradoDesert")
 DataNorth = DataA2[DataA2$Bioregion %in% NorthBior, ]
 DataCentral =  DataA2[DataA2$Bioregion %in% CentralBior, ]
 DataSouth = DataA2[DataA2$Bioregion %in% SouthBior, ]
-
+```
 
 #### 3. Run panel mdoels for each bioregion ####
 
 Notes: 
 - In the model call,  we scale each predictor so they are more directly comparable.
-- We are using lagged version of the mosquito abundances
+- We are using 1-year lagged version of the mosquito abundances to account for the lag between transmission and potential case detection
+- To define the panel data structure, we set year and bioregion as fixed effects
 
-# Full NorCal Panel Model
+**Full Northern California Panel Model**
+```
 NorCalpm = lm(TotalPositive ~  scale(Lag_Ae.aegypti) + scale(Lag_Ae.albopictus) + scale(Lag_Ae.sierrensis) +
                 scale(Lag_Ae.vexans) + scale(Lag_An.freeborni) + scale(Lag_Cs.incidencs) + scale(Lag_Cs.inornata) +
                 scale(Lag_Cx.quinquefasciatus) + scale(Lag_Cx.tarsalis) + 
                 scale(Lagged_DogDensity) + scale(Lagged_Income) 
                 factor(Year) + factor(Bioregion) - 1, data = DataNorth)
 summary(NorCalpm)
+```
 
-# Full SoCal Panel model #
+**Full Southern California Panel Model**
 SoCalpm = lm(TotalPositive ~  scale(Lag_Ae.aegypti) + scale(Lag_Ae.albopictus) + scale(Lag_Ae.sierrensis) +
                scale(Lag_Ae.vexans) + scale(Lag_An.freeborni) + scale(Lag_Cs.incidencs) + scale(Lag_Cs.inornata) +
                scale(Lag_Cx.quinquefasciatus) + scale(Lag_Cx.tarsalis) + 
@@ -51,7 +55,7 @@ SoCalpm = lm(TotalPositive ~  scale(Lag_Ae.aegypti) + scale(Lag_Ae.albopictus) +
                factor(Year) + factor(Bioregion) - 1, data = DataSouth)
 summary(SoCalpm)
 
-# Full CentralCal Panel Model
+**Full Central California Panel Model**
 CentralCalpm = lm(TotalPositive ~  scale(Lag_Ae.aegypti) + scale(Lag_Ae.albopictus) + scale(Lag_Ae.sierrensis) +
                 scale(Lag_Ae.vexans) + scale(Lag_An.freeborni) + scale(Lag_Cs.incidencs) + scale(Lag_Cs.inornata) +
                 scale(Lag_Cx.quinquefasciatus) + scale(Lag_Cx.tarsalis) + 
