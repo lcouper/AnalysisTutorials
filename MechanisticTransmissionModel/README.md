@@ -10,7 +10,7 @@ An overview of the steps below:
 
 Note this approach is outlined in [Mordecai et al. 2017](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0005568), and Dr. Erin Mordecai helped guide the construction of the code below
 
-### 1. Load packages and climate data 
+### 1. Load packages
 
 ```
 library(ncdf4)
@@ -25,7 +25,6 @@ library(RColorBrewer)
 library(tigris)
 
 setwd("TransmissionModel")
-source("Temperature_R0_Functions.R")
 ```
 
 ### 2. Define functions for life history trait 
@@ -178,16 +177,62 @@ Here, we are using climate data from the [California Basin Characterization Mode
 
 In this example, we will just use the data from a single month, year, and emissions scenario (RCP45).
 
-```
-mtmaxdata = nc_open("/Volumes/Bytes Cafe/Monthly/CA_BCM_MIROC_rcp45_Monthly_tmx_2092.nc")
-mtmindata = nc_open("/Volumes/Bytes Cafe/Monthly/CA_BCM_MIROC_rcp45_Monthly_tmn_2092.nc")
+Unfortunately these files are too large to upload to github directly, but the two files used in this example can be downloaded quickly and directly [here.](https://drive.google.com/drive/u/0/folders/1NGBdYFRHm4-M_miQ9la11If4Z4-RPbsC) 
 
-latm <- ncvar_get(mtmaxdata, "x")
+```
+mtmaxdata = nc_open("CA_BCM_MIROC_rcp45_Monthly_tmx_2020.nc")
+mtmindata = nc_open("CA_BCM_MIROC_rcp45_Monthly_tmn_2020.nc")
+
+latm <- ncvar_get(mtmaxdata, "x") # define latitude, longitude, and time variables
 lonm <- ncvar_get(mtmaxdata, "y")
 time <- ncvar_get(mtmaxdata, "time")
 
-# Note there is some weird indexing going on with the native files
-# Double check you are working with the correct month
 timeDate <- as.Date(time, origin = '2006-10-01')
-#timeDesired <- "2042-10-01"
-#timeIndex = which(timeDate == timeDesired)
+timeDesired <- "2020-07-01" # We will focus on the month of July, 2020 for this example
+timeIndex = which(timeDate == timeDesired)
+
+dfmax <- ncvar_get(nc = mtmaxdata, varid = "tmx", start = c(1,1,timeIndex), count = c(3486, 4477, 1))
+dfmin <- ncvar_get(nc = mtmindata, varid = "tmn", start = c(1,1,timeIndex), count = c(3486, 4477, 1))
+  
+# First, take the average of monthly max and min (element-wise average)
+  l <- list(dfmax, dfmin)
+  dfarr <-array( unlist(l) , c(3486,4477,2) )
+  dfavg <- apply( dfarr , 1:2 , mean )
+  
+# Next, calculate R0 for the given month using the functions defined above
+  
+  dfR0 = R0multi(dfavg)
+  # Convert NAs to 0
+  dfR0[is.na(dfR0)] <- 0
+
+# Next, rescale matrix to calculate a relative R0 (as is typically done in these analyses, as calculating absolute R0 depends on data that we don't have
+  #mn = min(dfR0); mx = max(dfR0);
+  #dfR0r = (dfR0 - mn) / (mx - mn)
+  
+# Next, convert this data frame to a raster using functions we defined in step 2
+  dfR0raster = RasterizeBCM(dfR0r)
+  
+# For plotting, pull in CA border shape (requires internet connection)
+  CA <- tigris::states() %>% subset(NAME == "California")
+  CA <- st_transform(CA, crs = st_crs(dfR0raster)) # for consistency with BCM data
+
+  dfCrop <-crop(dfR0raster, CA, snap = 'near')  # Crop R0 raster to CA
+  dfmask <- mask(dfCrop, CA) # mask out other regions
+```
+
+Optional parameters for beautification 😄
+```
+  breakpoints <- seq(0, 1, 0.05)
+  col2 <- rev(c("#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#e6f598", "#abdda4", "#66c2a5", "#3288bd"))
+  colors <- c("gray96", colorRampPalette(col2)(21))
+  
+  plot(dfmask, box = FALSE, axes = FALSE, breaks = breakpoints, col = colors, legend = F)
+  plot(CA$geometry, add = TRUE)
+  
+  # Export raster
+  #writeRaster(dfmask, "R0_2020-07-01.tif", format = "GTIFF")
+```
+<img width="310" alt="image" src="https://github.com/user-attachments/assets/f74c1434-d06c-4917-88ba-9fb225d7d73b">
+
+
+
