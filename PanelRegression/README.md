@@ -36,6 +36,7 @@ Notes:
 - In the model call,  we scale each predictor so they are more directly comparable.
 - We are using 1-year lagged version of the mosquito abundances to account for the lag between transmission and potential case detection
 - To define the panel data structure, we set year and bioregion as fixed effects
+- We also include dog density and county-level income as predictors in attempt to control for year-to-year and within-bioregion variation in host abundance and reporting tendencies (the year and bioregion fixed effects should account for yearly variation that affects all bioregions, and spatial variation that is constant over time within a given bioregion)
 
 **Full Northern California Panel Model**
 ```
