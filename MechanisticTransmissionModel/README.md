@@ -5,8 +5,10 @@ The code and description below outlines the steps for constructing a temperature
 An overview of the steps below:
 1. Load packages and climate data
 2. Define functions for each temperature-dependent mosquito life history trait
-3. Calculate R0 for the given month/year
-4. Rescale and plot the data
+3. Pull in temperature data
+4. Calculate tempearture-dependent R0 for the given month/year
+5. Rescale and rasterize R0
+6. Plot
 
 Note this approach is outlined in [Mordecai et al. 2017](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0005568), and Dr. Erin Mordecai helped guide the construction of the code below
 
@@ -171,7 +173,7 @@ Note that guidance on understanding crs syntax can be found [here:](https://mgim
 and info about the CA BCM crs can be found [here:](https://ca.water.usgs.gov/projects/reg_hydro/projects/basin-characterization-model-v8/basin-characterization-model-v8-metadata.html#org)
 
 
-### 3. Pull in climate data 
+### 3. Pull in temperature data 
 
 Here, we are using climate data from the [California Basin Characterization Model](https://ca.water.usgs.gov/projects/reg_hydro/basin-characterization-model.html) (Flint et al. 2013), which is available at a 270 m spatial resolution, and daily temporal resolution from 2006 - 2099.
 
@@ -193,7 +195,10 @@ timeIndex = which(timeDate == timeDesired)
 
 dfmax <- ncvar_get(nc = mtmaxdata, varid = "tmx", start = c(1,1,timeIndex), count = c(3486, 4477, 1))
 dfmin <- ncvar_get(nc = mtmindata, varid = "tmn", start = c(1,1,timeIndex), count = c(3486, 4477, 1))
-  
+```
+
+### 4. Calculate temperature-dependent R0
+```
 # First, take the average of monthly max and min (element-wise average)
   l <- list(dfmax, dfmin)
   dfarr <-array( unlist(l) , c(3486,4477,2) )
@@ -204,14 +209,20 @@ dfmin <- ncvar_get(nc = mtmindata, varid = "tmn", start = c(1,1,timeIndex), coun
   dfR0 = R0multi(dfavg)
   # Convert NAs to 0
   dfR0[is.na(dfR0)] <- 0
+```
 
+### 5. Rescale and rasterize R0
+```
 # Next, rescale matrix to calculate a relative R0 (as is typically done in these analyses, as calculating absolute R0 depends on data that we don't have
   #mn = min(dfR0); mx = max(dfR0);
   #dfR0r = (dfR0 - mn) / (mx - mn)
   
 # Next, convert this data frame to a raster using functions we defined in step 2
   dfR0raster = RasterizeBCM(dfR0r)
-  
+```
+
+### 6. Plot R0 raster
+```
 # For plotting, pull in CA border shape (requires internet connection)
   CA <- tigris::states() %>% subset(NAME == "California")
   CA <- st_transform(CA, crs = st_crs(dfR0raster)) # for consistency with BCM data
