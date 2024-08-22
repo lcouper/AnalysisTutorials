@@ -7,6 +7,6 @@ Please see folders for reproducible examples of common analytical approaches use
 - Mechanistic transmission modeling 🦟 
 - Case-crossover 😷
 - WGS analysis including:
--   sequence data processing
--   variant calling
--   GWA
+  - sequence data processing
+  - variant calling
+  - GWA
