@@ -1,2 +1,2 @@
 # AnalysisTutorials
-Tutorials for common biological analysis techniques
+Tutorials for common analytical approaches used in ecology, evolution, and epidemiology
