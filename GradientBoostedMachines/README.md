@@ -10,6 +10,8 @@ In this example, we develop an XGboost classification model to predict the prese
 
 This example accompanies the manuscript "Ecological drivers of dog heartworm transmission in California" available [here.](https://link.springer.com/article/10.1186/s13071-022-05526-x#Sec2)
 
+Note that help constructing this code was provided by Dr. Caroline Glidden
+
 **The basic steps are:**
 
 1. Load packages and data
