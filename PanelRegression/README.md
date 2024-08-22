@@ -10,6 +10,9 @@ The dataset used here ('MosquitoAbundance_PanelData') pertains to observations o
 
 This tutorial accompanies the manuscript "Ecological drivers of dog heartworm transmission in California" available [here.](https://link.springer.com/article/10.1186/s13071-022-05526-x#Sec13)
 
+![Image](https://github.com/user-attachments/assets/8996245d-8435-4f6a-9f34-8388ebc6635c)
+
+
 #### 1. Load packages and data ####
 ```
 library(data.table)
@@ -113,7 +116,11 @@ Coefficient estimates across models:
 
 #### 4. Interpretations ####
 
-Given the results generated above, we may infer: 
+Take-aways from the results above include: 
+- The vector species that were significantly, positively associated with dog heartworm cases varied regionally and included four species in total: Ae. aegypti (Central California; p = 0.010), Ae. albopictus (Southern California; p = 0.008), Ae. sierrensis (Central California; p = 0.045), and Cs. incidens (Northern and Central California; p = 0.005, 0.006).
+- The effect sizes of these associations varied from an additional 8–35 cases in the year following a one standard deviation increase in mosquito abundance.
+- Several mosquito species were significantly negatively associated with dog heartworm cases: Culex tarsalis in Northern California and Ae. sierrensis and Ae. vexans in Southern California. Cases were also negatively associated with Ae. albopictus in Northern California, but this species was only found here in one bioregion and 1 year (Klamath in 2020) so this estimated relationship may be biased.
+- The annual abundance of other putative vector species—An. freeborni, Cs. inornata, and Cx. quinquefasciatus—was not significantly associated with variation in dog heartworm cases in any region.
 
 
 
