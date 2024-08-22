@@ -35,8 +35,8 @@ DataSouth = DataA2[DataA2$Bioregion %in% SouthBior, ]
 Notes: 
 - In the model call,  we scale each predictor so that their effects are more directly comparable.
 - We are using 1-year lagged version of the mosquito abundances to account for the lag between transmission and potential case detection
-- To define the panel data structure, we set year and bioregion as fixed effects
-- We also include dog density and county-level income as predictors in attempt to control for year-to-year and within-bioregion variation in host abundance and reporting tendencies (the year and bioregion fixed effects should account for yearly variation that affects all bioregions, and spatial variation that is constant over time within a given bioregion)
+- To define the panel data structure, we set year and bioregion as fixed effects (or 'dummy variables'). This should help control for any unobserved heterogeneity that might influence dog heartworm cases in a particular bioregion across all years (e.g. geographic features, number of veterinary clinics) or influence cases in all bioregions in a given year (e.g. an influx of shelter dogs to the state due to natural disaster, higher case reporting). 
+- We also include dog density and county-level income as predictors in attempt to control for variation across time within a given bioregion in host abundance and reporting tendencies.
 
 **Full Southern California panel model**
 ```
@@ -48,13 +48,21 @@ SoCalpm = lm(TotalPositive ~  scale(Lag_Ae.aegypti) + scale(Lag_Ae.albopictus) +
 summary(SoCalpm)
 ```
 
+<img width="650" alt="image" src="https://github.com/user-attachments/assets/b92454eb-9636-4b95-86a6-13e9a89b0f65">
+
+The scaled coefficient estimates shown here denote the change in dog heartworm cases from a one standard deviation change in mosquito abundances.
+
 **Repeat for Central California**
-CentralCalpm = lm(TotalPositive ~  scale(Lag_Ae.aegypti) + scale(Lag_Ae.albopictus) + scale(Lag_Ae.sierrensis) +
+Note: Aedes albopictus was not included as a predictor in the model for Central California as it was not found in either Central California bioregion in any year.
+
+```
+CentralCalpm = lm(TotalPositive ~  scale(Lag_Ae.aegypti)  + scale(Lag_Ae.sierrensis) +
                 scale(Lag_Ae.vexans) + scale(Lag_An.freeborni) + scale(Lag_Cs.incidencs) + scale(Lag_Cs.inornata) +
                 scale(Lag_Cx.quinquefasciatus) + scale(Lag_Cx.tarsalis) + 
                 scale(Lagged_DogDensity) + scale(Lagged_Income) +
                 factor(Year) + factor(Bioregion) - 1, data = DataCentral)
 summary(CentralCalpm)
+```
 
 **Repeat for Northern California**
 ```
@@ -66,7 +74,9 @@ NorCalpm = lm(TotalPositive ~  scale(Lag_Ae.aegypti) + scale(Lag_Ae.albopictus) 
 summary(NorCalpm)
 ```
 
+To understand how much of the variation in dog heartworm cases may be explained by the predictors of interest (i.e., mosquito abundance, dog density, income) we repeat the model but including only the year and bioregion fixed effets:
 
+```
 # NorCal fixed effects only
 NorCalpmFEonly = lm(TotalPositive ~   
                       factor(Year) + factor(Bioregion) - 1, data = DataNorth)
@@ -81,34 +91,11 @@ summary(SoCalpmFEonly)
 CentralCalpmFEonly = lm(TotalPositive ~   
                       factor(Year) + factor(Bioregion) - 1, data = DataCentral)
 summary(CentralCalpmFEonly)
+```
 
-# NorCal year fixed effect only
-NorCalpmYearonly = lm(TotalPositive ~   
-                        factor(Year) - 1, data = DataNorth)
-summary(NorCalpmYearonly)
+Coefficient estimates across models:
 
-# SoCal year fixed effect only
-SoCalpmYearonly = lm(TotalPositive ~   
-                        factor(Year) - 1, data = DataSouth)
-summary(SoCalpmYearonly)
-
-# CentralCal year fixed effect only
-CentralCalpmYearonly = lm(TotalPositive ~   
-                        factor(Year) - 1, data = DataCentral)
-summary(CentralCalpmYearonly)
+![image](https://github.com/user-attachments/assets/4185386f-ed50-4a1e-b924-904beea3ba80)
 
 
-# NorCal bioregion fixed effect only
-NorCalpmBioronly = lm(TotalPositive ~   
-                        factor(Bioregion) - 1, data = DataNorth)
-summary(NorCalpmBioronly)
 
-# SoCal bioregion fixed effect only
-SoCalpmBioronly = lm(TotalPositive ~   
-                        factor(Bioregion) - 1, data = DataSouth)
-summary(SoCalpmBioronly)
-
-# CentralCal bioregion fixed effect only
-CentralCalpmBioronly = lm(TotalPositive ~   
-                        factor(Bioregion) - 1, data = DataCentral)
-summary(CentralCalpmBioronly)
