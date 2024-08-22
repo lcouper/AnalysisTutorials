@@ -1,4 +1,4 @@
-# Panel Regression
+# Panel Regression 📈
 
 The code and description below outlines the steps for conducting a regression using panel data (for leveraging repeated observations of a given unit over time as a way to address bias due to confounders). The basic steps will involve: 
 
