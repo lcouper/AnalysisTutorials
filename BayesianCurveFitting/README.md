@@ -1,5 +1,5 @@
 
-# Tutorial on Bayesian Curve Fitting 
+# Tutorial on Bayesian Curve Fitting 🧠
 
 ## Overview
 
