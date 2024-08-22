@@ -3,7 +3,7 @@ Please see below for reproducible examples of common analytical approaches used 
 
 - [Bayesian curve fitting](https://github.com/lcouper/AnalysisTutorials/tree/main/BayesianCurveFitting) 🧠
 - [Panel regression](https://github.com/lcouper/AnalysisTutorials/tree/main/PanelRegression)  📈
-- Gradient boosted trees 🌳
+- [Gradient boosted machines](https://github.com/lcouper/AnalysisTutorials/tree/main/GradientBoostedMachines) 🌳
 - Mechanistic transmission modeling 🦟 
 - Case-crossover 😷
 - WGS analysis including 🧬 :
