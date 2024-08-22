@@ -6,28 +6,19 @@ The code and description below outlines the steps for conducting a regression us
 2. Setting up the regression model
 3. Visualizing output
 
-The dataset used here ('MosquitoAbundance_PanelData') pertains to observations of various mosquito species across California counties from 2012 - 2020.
+The dataset used here ('MosquitoAbundance_PanelData') pertains to observations of various mosquito species across California counties from 2012 - 2020, as well as cases of dog heartworm for those counties and years.
 
 #### 1. Load packages and data ####
+
 library(data.table)
 library(mltools)
 
-DataA = read.csv("~/Documents/Current_Projects/DogHeartworm/Q1analysis_AllPredictors_MosqAbundance.csv", header =T)[,-1]
-DataADT = data.table(DataA)
-DataA2 = one_hot(DataADT)
+setwd("~/PanelRegression")
+data = read.csv("MosquitoAbundance_PanelData.csv", header =T)[,-1]
 
-# set NAs in mosquito abundance data to 0
-DataA2$Lag_Ae.sierrensis[is.na(DataA2$Lag_Ae.sierrensis)] <- 0
-DataA2$Lag_Ae.albopictus[is.na(DataA2$Lag_Ae.albopictus)] <- 0
-DataA2$Lag_Ae.aegypti[is.na(DataA2$Lag_Ae.aegypti)] <- 0
-DataA2$Lag_Ae.vexans[is.na(DataA2$Lag_Ae.vexans)] <- 0
-DataA2$Lag_An.freeborni[is.na(DataA2$Lag_An.freeborni)] <- 0
-DataA2$Lag_Cs.incidencs[is.na(DataA2$Lag_Cs.incidencs)] <- 0
-DataA2$Lag_Cs.inornata[is.na(DataA2$Lag_Cs.inornata)] <- 0
-DataA2$Lag_Cx.tarsalis[is.na(DataA2$Lag_Cx.tarsalis)] <- 0
-DataA2$Lag_Cx.quinquefasciatus[is.na(DataA2$Lag_Cx.quinquefasciatus)] <- 0
+#### 2. Separate data into bioregions #####
 
-#### 2. Separate Northern, Central, & Southern CA bioregions #####
+Given broad climatic and ecological differences between California bioregions, we may want to run separate regressions for each. Here, we separate out data into Northern, Central, and Southern bioregions:
 
 NorthBior = c("BayDelta", "Klamath", "Sierra", "SacramentoValley")
 DataCentral =  DataA2[DataA2$Bioregion %in% CentralBior, ]
@@ -38,8 +29,11 @@ DataCentral =  DataA2[DataA2$Bioregion %in% CentralBior, ]
 DataSouth = DataA2[DataA2$Bioregion %in% SouthBior, ]
 
 
-#### 3. Run panel mdoels for Northern and Southern CA ####
-# scale predictors so they are directly comparable
+#### 3. Run panel mdoels for each bioregion ####
+
+Notes: 
+- In the model call,  we scale each predictor so they are more directly comparable.
+- We are using lagged version of the mosquito abundances
 
 # Full NorCal Panel Model
 NorCalpm = lm(TotalPositive ~  scale(Lag_Ae.aegypti) + scale(Lag_Ae.albopictus) + scale(Lag_Ae.sierrensis) +
