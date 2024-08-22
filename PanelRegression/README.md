@@ -8,15 +8,29 @@ The code and description below outlines the steps for conducting a regression us
 
 The dataset used here ('MosquitoAbundance_PanelData') pertains to observations of various mosquito species across California counties from 2012 - 2020, as well as cases of dog heartworm for those counties and years. We are using a panel regression approach to investigate whether variation in the abundance of any particular mosquito species is associated with variation in dog heartworm cases.
 
+This tutorial accompanies the manuscript "Ecological drivers of dog heartworm transmission in California" available [here.](https://link.springer.com/article/10.1186/s13071-022-05526-x#Sec13)
+
 #### 1. Load packages and data ####
 ```
 library(data.table)
 library(mltools)
+library(regclass)
 
 setwd("~/PanelRegression")
 data = read.csv("MosquitoAbundance_PanelData.csv", header =T)[,-1]
 ```
-#### 2. Separate data into bioregions #####
+#### 2. Test for multicollinearity in predictors #####
+
+Calculate the variance inflation factor (VIF) to assess multicollinearity of mosquito abundacne predictors:
+```
+testformulti <- lm(TotalPositive ~  Lag_Ae.aegypti + Lag_Ae.albopictus + Lag_Ae.sierrensis +
+                   Lag_Ae.vexans + Lag_An.freeborni + Lag_Cs.incidencs + Lag_Cs.inornata +
+                   Lag_Cx.quinquefasciatus + Lag_Cx.tarsalis, data = DataA)
+VIF(testformulti)
+```
+None of the mosquito predictors have a VIF value > 3. Ok to proceed without excluding any species from the model 
+
+#### 3. Separate out data based on bioregion #####
 
 Given broad climatic and ecological differences between California bioregions, we may want to run separate regressions for each. Here, we separate out data into Northern, Central, and Southern bioregions:
 
@@ -96,6 +110,10 @@ summary(CentralCalpmFEonly)
 Coefficient estimates across models:
 
 ![image](https://github.com/user-attachments/assets/4185386f-ed50-4a1e-b924-904beea3ba80)
+
+#### 4. Interpretations ####
+
+Given the results generated above, we may infer: 
 
 
 
