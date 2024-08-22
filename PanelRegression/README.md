@@ -47,7 +47,7 @@ DataCentral =  DataA2[DataA2$Bioregion %in% CentralBior, ]
 DataSouth = DataA2[DataA2$Bioregion %in% SouthBior, ]
 ```
 
-#### 3. Run panel mdoels for each bioregion ####
+#### 4. Run panel mdoels for each bioregion ####
 
 Notes: 
 - In the model call,  we scale each predictor so that their effects are more directly comparable.
@@ -91,6 +91,7 @@ NorCalpm = lm(TotalPositive ~  scale(Lag_Ae.aegypti) + scale(Lag_Ae.albopictus) 
 summary(NorCalpm)
 ```
 
+#### 5. Repeat with fixed effects only ####
 To understand how much of the variation in dog heartworm cases may be explained by the predictors of interest (i.e., mosquito abundance, dog density, income) we repeat the model but including only the year and bioregion fixed effets:
 
 ```
@@ -114,7 +115,7 @@ Coefficient estimates across models:
 
 ![image](https://github.com/user-attachments/assets/4185386f-ed50-4a1e-b924-904beea3ba80)
 
-#### 4. Interpretations ####
+#### 6. Interpretations ####
 
 Take-aways from the results above include: 
 - The vector species that were significantly, positively associated with dog heartworm cases varied regionally and included four species in total: Ae. aegypti (Central California; p = 0.010), Ae. albopictus (Southern California; p = 0.008), Ae. sierrensis (Central California; p = 0.045), and Cs. incidens (Northern and Central California; p = 0.005, 0.006).
