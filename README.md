@@ -2,7 +2,7 @@
 Please see below for reproducible examples of common analytical approaches used in ecology, evolution, and epidemiology including:  
 
 - [Bayesian curve fitting](https://github.com/lcouper/AnalysisTutorials/tree/main/BayesianCurveFitting) 🧠
-- Panel regression  📈
+- [Panel regression](https://github.com/lcouper/AnalysisTutorials/tree/main/PanelRegression)  📈
 - Gradient boosted trees 🌳
 - Mechanistic transmission modeling 🦟 
 - Case-crossover 😷
