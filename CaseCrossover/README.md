@@ -1,4 +1,4 @@
-Case-Crossover 😷 
+## Case-Crossover 😷 
 
 The code and description below outlines the steps for conducting a case-crossover -- a commnon study design in epidemiology.
 
