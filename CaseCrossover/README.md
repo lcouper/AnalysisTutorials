@@ -1,7 +1,10 @@
-Case Crossover 
+Case-Crossover 😷 
 
-The code and description below outlines the steps for conducting a gradient boosted machine approach using the XGboost package in R. Briefly:
+The code and description below outlines the steps for conducting a case-crossover -- a commnon study design in epidemiology.
 
-Gradient boosting is a supervised machine learning approach in which regression or classification trees are sequentially built from the prediction errors of the prior tree.
-GBM algorithms allow for complex, nonlinear relationships among predictor and outcome variables and collinearity between predictors, making them well suited for ecological analyses.
-Extreme gradient boosting is a scalable and efficient GBM implementation that minimizes overfitting and has been shown to achieve high predictive accuracy.
+In brief, the case-crossover approach is useful for examining associations between exposures to some risk factor that varies over time (e.g., air pollution, alcohol consumption) and an acute outcome (e.g., heart attack, car crash).  
+The study population consists entirely of individuals that have experienced the outcome, and inference is based on comparing that individuals exposure to the risk factor before the outcome and during some control period.  
+Because comparisons are made at the level of a given individual, confounders that don't change over time such as sex or genetics are inherently controlled for.  
+
+~The rest is coming soon - sorry for the delay!~
+
