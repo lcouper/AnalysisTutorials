@@ -9,3 +9,4 @@ Please see below for reproducible examples of common analytical approaches used 
   - sequence data processing
   - variant calling
   - GWA
+- [Case-crossover](https://github.com/lcouper/AnalysisTutorials/blob/main/CaseCrossover/) 
