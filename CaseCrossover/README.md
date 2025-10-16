@@ -4,7 +4,7 @@ The code and description below outlines the steps for conducting a case-crossove
 
 **Overview**   
 The case-crossover approach is useful for examining associations between exposures to some risk factor that varies over time (e.g., air pollution, alcohol consumption) and an acute outcome (e.g., heart attack, car crash).  
-The study population consists entirely of individuals that have experienced the outcome, and inference is based on comparing that individuals exposure to the risk factor before the outcome and during some control period.  
+The study population consists entirely of individuals that have experienced the outcome, and inference is based on comparing that individuals' exposure to the risk factor before the outcome and during some control period.  
 Because comparisons are made at the level of a given individual, confounders that don't change over time such as sex or genetics are inherently controlled for.  
 
 In the code and explanation below, we will walk through an example of a case-crossover analysis to investigate the impact of oil and gas well development on coccidioidomycosis risk in Kern County, California, following the [manuscript available here](https://www.medrxiv.org/content/10.1101/2025.09.19.25336198v1). The tutorial uses the mock dataets 'mock_cases.csv' and 'mock_well_data.csv' uploaded here, as the real data are protected health information.  
@@ -12,8 +12,7 @@ In the code and explanation below, we will walk through an example of a case-cro
 This code and tutorial was made in collaboration with Dr. Jennifer Head and Philip Collender, MPH  
 
 
-**Step 1. Load libraries**
-Here, we will first define the exposure window (fill in what this is), and cutoff distance (fill in what this is)
+**Step 1. Load libraries**   
 ```
 source("YourPathToMockDataFilesAndScript/functions_plotting.R")
 
@@ -21,15 +20,15 @@ library(sf); library(lubridate); library(plotrix); library(dplyr); library(ggplo
 library(stringr); library(survival); library(parallel); library(doParallel); library(foreach); library(splines); library(paletteer); library(cowplot); library(data.table); library(usethis)
 ```
 
-**Step 2. Bring in (mock) datasets**  
+**Step 2. Bring in (mock) datasets**   
 The representative (mock) datasets provided here contain randomly generated values and rows but maintain the same data frame format and necessary columns as used in the analysis. 
 ```
 mock_wells <- fread("mock_well_data.csv")
 mock_cases <- fread("mock_cases.csv")
 ```
 
-**Step 3. Set up variables**  
-Here we will define the exposure window (fill in what this is) and cutoff distance (fill in what this is).    
+**Step 3. Set up variables**    
+Here we will define the exposure window (here, the full number of days across which exposures to wells are considered relevant) and cutoff distance (here, the maximum radius around each case residence within which wells are considered relevant for exposure. In this analysis, we defined a 90 day exposure window to account for variability in the time between exposure and symptom onset, and time between symptom onset and diagnosis. We set the cutoff distance at 5km given prior work finding that air pollution from oil and gas well development was detectable up to this distance [Gonzalez et al. 2022](https://www.sciencedirect.com/science/article/pii/S0048969721053754) 
 ```
 # exposure window
 days <- 30*3
@@ -38,7 +37,7 @@ days <- 30*3
 limit <- 5000 # 5KM
 ```
 
-**Step 4. Data preparation**
+**Step 4. Prepare the data**  
 (desription of how we are preparing the data for this analysis)
 
 ```
@@ -98,7 +97,7 @@ mock_wells_sf_sub = subset(mock_wells_sf, spud_date >= earliest_date &
 mock_wells_sf_sub = mock_wells_sf_sub[unlist(st_contains(mock_cases_buffer, mock_wells_sf_sub)),] 
 ```
 
-**Step 5. Calculate distances between all wells and cases**
+**Step 5. Calculate distances between all wells and cases**   
 (say something about why we're doing this)
 ```
 dists <- units::drop_units(st_distance(mock_wells_sf_sub, mock_cases_sf,))
@@ -122,7 +121,7 @@ spud_dates_reg[1:4,1:4] # Here, each row represents a well, each column represen
 comp_dates_reg[1:4,1:4] 
 ```
 
-**Step 6. Calculate exposures during the hazard period**
+**Step 6. Calculate exposures during the hazard period**   
 ```
 # For cases: keep distances if they fall in the right time period
 distsCase <- dists 
@@ -144,8 +143,7 @@ summary(case_sf$case_di0_5)
 sum(mock_cases_sf$case_di0_5 >= 1) # 148
 ```
 
-**Step 7. Calculate exposures during the control period**
-
+**Step 7. Calculate exposures during the control period**   
 ```
 # For controls: keep distances if they fall in the right time period
 distsControlpre <- distsControlpost <- dists
@@ -186,7 +184,156 @@ mock_cases_sf <- mock_cases_sf %>% mutate(contr_di0_5 = contr_di0_1 + contr_di1_
 # how many exposed during control hazard period
 sum(mock_cases_sf$contr_di0_5 >= 1) # 132
 
-# Convert wide to long.
-# Note this uses a custom function written in the accompanying 'functions_plotting.R' script provided here  
+# Convert wide to long. Note this uses a custom function written in the accompanying 'functions_plotting.R' script provided here 
 cclong <- make_cclong(mock_cases_sf)
 ```
+
+**Step 8. Generate negative control**   
+(add description of what negative controls are, using verbiage/context from this paper: https://www.medrxiv.org/content/10.1101/2025.09.19.25336198v1.full-text
+
+```
+# Here, we exposure occurs in the 3.5 month period AFTER the event 
+# For cases: keep distances if they fall in the right time period
+distsCaseNC <- dists 
+distsCaseNC[spud_dates_reg > (0-7)] = NA
+distsCaseNC[spud_dates_reg < (-1*days)-7] = NA
+
+# Tally wells within distances on each row
+mock_cases_sfNC2 <- mock_cases_sf
+mock_cases_sfNC2$case_di0_1 = colSums(distsCaseNC < 1000,na.rm = T)
+mock_cases_sfNC2$case_di1_2 = colSums(distsCaseNC >= 1000 & distsCaseNC < 2000,na.rm = T)
+mock_cases_sfNC2$case_di2_3 = colSums(distsCaseNC >= 2000 & distsCaseNC < 3000,na.rm = T)
+mock_cases_sfNC2$case_di3_4 = colSums(distsCaseNC >= 3000 & distsCaseNC < 4000,na.rm = T)
+mock_cases_sfNC2$case_di4_5 = colSums(distsCaseNC >= 4000 & distsCaseNC <= 5000,na.rm = T)
+
+mock_cases_sfNC2 <- mock_cases_sfNC2 %>% mutate(case_di0_5 = case_di0_1 + case_di1_2 +
+                                      case_di2_3 + case_di3_4 + case_di4_5)
+# how many exposed during "hazard" period
+sum(mock_cases_sfNC2$case_di0_5 >= 1) # 121
+
+# Do it for the control period : keep distances if they fall in the right time period
+distsControlpreNC <- distsControlpostNC <- dists 
+
+distsControlpostNC[spud_dates_reg > (365 + 7 + days)] = NA 
+distsControlpostNC[spud_dates_reg < 365 + 7] = NA
+
+distsControlpreNC[spud_dates_reg > (0 - 365 + 7 + days)] = NA
+distsControlpreNC[spud_dates_reg < 0 - 365 + 7] = NA
+
+# Tally wells within distances on each row
+mock_cases_sfNC2$contrpost_di0_1 = colSums(distsControlpostNC < 1000,na.rm = T)
+mock_cases_sfNC2$contrpost_di1_2 = colSums(distsControlpostNC >= 1000 & distsControlpostNC < 2000,na.rm = T)
+mock_cases_sfNC2$contrpost_di2_3 = colSums(distsControlpostNC >= 2000 & distsControlpostNC < 3000,na.rm = T)
+mock_cases_sfNC2$contrpost_di3_4 = colSums(distsControlpostNC >= 3000 & distsControlpostNC < 4000,na.rm = T)
+mock_cases_sfNC2$contrpost_di4_5 = colSums(distsControlpostNC >= 4000 & distsControlpostNC <= 5000,na.rm = T)
+
+mock_cases_sfNC2$contrpre_di0_1 = colSums(distsControlpreNC < 1000,na.rm = T)
+mock_cases_sfNC2$contrpre_di1_2 = colSums(distsControlpreNC >= 1000 & distsControlpreNC < 2000,na.rm = T)
+mock_cases_sfNC2$contrpre_di2_3 = colSums(distsControlpreNC >= 2000 & distsControlpreNC < 3000,na.rm = T)
+mock_cases_sfNC2$contrpre_di3_4 = colSums(distsControlpreNC >= 3000 & distsControlpreNC < 4000,na.rm = T)
+mock_cases_sfNC2$contrpre_di4_5 = colSums(distsControlpreNC >= 4000 & distsControlpreNC <= 5000,na.rm = T)
+
+mock_cases_sfNC2 <- mock_cases_sfNC2 %>% mutate(contr_di0_1 = ifelse(dir == 1, contrpost_di0_1,
+                                                         contrpre_di0_1),
+                                    contr_di1_2 = ifelse(dir == 1, contrpost_di1_2,
+                                                         contrpre_di1_2),
+                                    contr_di2_3 = ifelse(dir == 1, contrpost_di2_3,
+                                                         contrpre_di2_3),
+                                    contr_di3_4 = ifelse(dir == 1, contrpost_di3_4,
+                                                         contrpre_di3_4),
+                                    contr_di4_5 = ifelse(dir == 1, contrpost_di4_5,
+                                                         contrpre_di4_5))
+
+mock_cases_sfNC2 <- mock_cases_sfNC2 %>% mutate(contr_di0_5 = contr_di0_1 + contr_di1_2 +
+                                      contr_di2_3 + contr_di3_4 + contr_di4_5)
+
+# how many exposed during control, 'hazard' period
+sum(mock_cases_sfNC2$contr_di0_5 >= 1) # 112
+
+# run the conditional logistic regression model
+cclongNC2 <- make_cclong(mock_cases_sfNC2)
+
+# Combine observed and negative control data
+cclongNC2sel <- cclongNC2 %>% select(names(cclongNC2)[c(10, 15, 18, 21, 24, 27:39)])
+colnames(cclongNC2sel) <- paste0(colnames(cclongNC2sel), "NC")
+cclongF <- cbind(cclong, cclongNC2sel)
+
+coefsNC <- run_models_with_neg_control(cclongF, model5 = T)
+colnames(coefsNC)[1:4] <- c("OR", "logOR", "lower", "upper")
+```
+
+**Step 9. Plot coefficient estimates**   
+(say something about what a coefficient estimate represents here (somehow converted to Odds ratios (OR) representing the odds of coccidioidomycosis given exposure to oil and gas well construction at varying distances from the patient residence)
+```
+# First, plot without negative control
+coefsNC = read.csv("Mock_CoefEstimates.csv", row.names = 1)
+
+make_plots_obsvOnly(coefsNC, model_num = 1, xlab = "Distance from case", ystart = 0.2, h = 0.8)
+make_plots_obsvOnly(coefsNC, model_num = 3, xlab = "Distance from case", ystart = 0.2, h = 0.8)
+make_plots_obsvOnly(coefsNC, model_num = 5, xlab = "Quartile", ystart = 0.2, h = 0.8)
+
+make_plots_obsvOnly(coefsNC, model_num = 2, xlab = "Distance from case", ystart = 0.2, h = 0.8)
+make_plots_obsvOnly(coefsNC, model_num = 4, xlab = "Distance from case", ystart = 0.2, h = 0.8)
+
+# Now, plot with negative controls
+# main model
+coefsNC = read.csv("Mock_CoefEstimates.csv", row.names = 1)
+
+# continuous
+make_plots(coefsNC, model_num = 1, xlab = "Distance from case", ystart = 0.2, h = 0.8)
+# binary 
+make_plots(coefsNC, model_num = 3, xlab = "Distance from case", ystart = 0.2, h = 0.8)
+# quartile
+make_plots(coefsNC, model_num = 5, xlab = "Quartile", ystart = 0.2, h = 0.8)
+```
+
+**Step 10. To stratify analyses by season of exposure**   
+
+(some description)
+```
+cclongF <- fread("MockExposures.csv")
+
+##### SEASON #####
+
+cclongF$Month = month(as.POSIXlt(cclongF$diagDate, format = "%Y-%m-%d"))
+cclongF$Season = recode(cclongF$Month, '1' = "Winter", '2' = "Winter", '12' = "Winter",
+                        '3' = "Spring", '4' = "Spring", '5' = "Spring",
+                        '6' = "Summer", '7' = "Summer", '8' = "Summer",
+                        '9' = "Fall", '10' = "Fall", '11' = "Fall")
+
+# Defining season based on when case occurred, not on when well was spud
+table(cclongF$Season)/2
+
+coefsWinter <- run_models_with_neg_control(cclongF %>% subset(Season == "Winter"), model5 = F)
+coefsSpring <- run_models_with_neg_control(cclongF %>% subset(Season == "Spring"), model5 = F) # not enough unique breaks to run models here
+coefsSummer <- run_models_with_neg_control(cclongF %>% subset(Season == "Summer"), model5 = F)
+coefsFall <- run_models_with_neg_control(cclongF %>% subset(Season == "Fall"), model5 = F)
+
+coefsWinter$Estimate <- "Winter"
+coefsSpring$Estimate <- "Spring"
+coefsSummer$Estimate <- "Summer"
+coefsFall$Estimate <- "Fall"
+
+coefsSeason <- rbind(coefsWinter, coefsSpring, coefsSummer, coefsFall)
+colnames(coefsSeason)[1:4] <- c("OR", "logOR", "lower", "upper")
+
+# Remove estimates for negative controls for plotting:
+coefsSeason = coefsSeason[!str_detect(rownames(coefsSeason), "NC"),]
+
+# continuous, binary, quantile
+make_plots_strata(coefsSeason, model_num = 1, xlab = "Distance from case", ystart = 0.2, h = 0.8)
+make_plots_strata(coefsSeason, model_num = 3, xlab = "Distance from case", ystart = 0.2, h = 0.8)
+# Note: not enough unique breaks within each season to run quartile model
+make_plots_strata(coefsSeason, model_num = 5, xlab = "Quartile", ystart = 0.2, h = 0.8)
+
+# Wald tests:
+cclongWinter <- cclongF %>% subset(Season == "Winter")
+cclongFall <- cclongF %>% subset(Season == "Fall")
+cclongSpring <- cclongF %>% subset(Season == "Spring")
+cclongSummer <- cclongF %>% subset(Season == "Summer")
+
+waldtest(cclongFall, cclongSpring, model = "C") # sig diff at 0-5 , p : 0.006117326
+waldtest(cclongWinter, cclongSummer, model = "B") # not sig
+```
+
+
