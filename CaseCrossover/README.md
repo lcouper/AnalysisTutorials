@@ -38,8 +38,7 @@ limit <- 5000 # 5KM
 ```
 
 **Step 4. Prepare the data**  
-(desription of how we are preparing the data for this analysis)
-
+Here we will parse dates, convert well data to sf objects, and unionize buffers around all cases to trim wells to the relevant spatial extent. We will also restrict cases to the study period (2007-2022) and randomly assign a direction for pre/post control periods (i.e. applying a semi-symmetric bi-directional design).   
 ```
 mock_wells <- mock_wells %>% mutate(
     INTPTLAT = as.numeric(gsub("^\\+", "", INTPTLAT)),
@@ -98,7 +97,7 @@ mock_wells_sf_sub = mock_wells_sf_sub[unlist(st_contains(mock_cases_buffer, mock
 ```
 
 **Step 5. Calculate distances between all wells and cases**   
-(say something about why we're doing this)
+In order to count exposures by distance bands, here we calculate the well-to-case distances and build matrices encoding whether well activity fell inside each case’s hazard/control windows. 
 ```
 dists <- units::drop_units(st_distance(mock_wells_sf_sub, mock_cases_sf,))
 saveRDS(dists, file = "Calculated_distances.RDS")
@@ -121,7 +120,8 @@ spud_dates_reg[1:4,1:4] # Here, each row represents a well, each column represen
 comp_dates_reg[1:4,1:4] 
 ```
 
-**Step 6. Calculate exposures during the hazard period**   
+**Step 6. Calculate exposures during the hazard period**  
+Here, we will tabulate the number of wells with activity dates overlapping the hazard window. In our days, the hazard window is the 49-139 days prior to the case date (again to account for delays in symptom presentation, health-care seeking, diagnosis, and reporting). 
 ```
 # For cases: keep distances if they fall in the right time period
 distsCase <- dists 
@@ -139,11 +139,14 @@ mock_cases_sf <- mock_cases_sf %>% mutate(case_di0_5 = case_di0_1 + case_di1_2 +
                                 case_di2_3 + case_di3_4 + case_di4_5)
 summary(case_sf$case_di0_5)
 
-# how many exposed during hazard period
+# Tip: case_di0_5 is the total wells within 0–5 km in the hazard window.
+
+# Calculate how many cases had exposures during their hazard period
 sum(mock_cases_sf$case_di0_5 >= 1) # 148
 ```
 
 **Step 7. Calculate exposures during the control period**   
+The logic here is to mirror the hazard window, but exactly one year before or one year after the case (bidirectional controls). This helps control for seasonality in exposures. Here, each case gets one matched control (but this could be increased). We then reshape the data to long format for conditional logistic regression (clogit, which estimates within-person odds ratios comparing hazard vs control exposures.   
 ```
 # For controls: keep distances if they fall in the right time period
 distsControlpre <- distsControlpost <- dists
@@ -189,8 +192,7 @@ cclong <- make_cclong(mock_cases_sf)
 ```
 
 **Step 8. Generate negative control**   
-(add description of what negative controls are, using verbiage/context from this paper: https://www.medrxiv.org/content/10.1101/2025.09.19.25336198v1.full-text
-
+While the case-crossover study design, and the approach to control period selection implemented here, controls for confounding from time-invariant factors, seasonality, and time trends in the exposure, we can further reduce residual confounding from any unmeasured, time-varying factors by including a negative control exposure in our model. Here, we have defined the negative control exposure as a “hazard” period that occurred in the 7-97 days *following* a case report. This serves as an ideal negative control as the construction of new wells occurring *after* the estimated disease onset is expected to be associated with the true exposure (as certain locations may experience more frequent oil and gas well construction), yet conditionally independent of disease onset in the absence of confounding, model misspecification, and measurement error.   
 ```
 # Here, we exposure occurs in the 3.5 month period AFTER the event 
 # For cases: keep distances if they fall in the right time period
@@ -263,7 +265,7 @@ colnames(coefsNC)[1:4] <- c("OR", "logOR", "lower", "upper")
 ```
 
 **Step 9. Plot coefficient estimates**   
-(say something about what a coefficient estimate represents here (somehow converted to Odds ratios (OR) representing the odds of coccidioidomycosis given exposure to oil and gas well construction at varying distances from the patient residence)
+Belo, we plot odds ratios (OR) and confidence intervals for the association between well activity within distance rings and case onset, comparing hazard vs. control windows. OR > 1 suggests higher odds of coccidioidomycosis given exposure to well activity.
 ```
 # First, plot without negative control
 coefsNC = read.csv("Mock_CoefEstimates.csv", row.names = 1)
@@ -288,8 +290,7 @@ make_plots(coefsNC, model_num = 5, xlab = "Quartile", ystart = 0.2, h = 0.8)
 ```
 
 **Step 10. To stratify analyses by season of exposure**   
-
-(some description)
+To investigate whether the association between well activity and coccidioidomycosis infection varies based on season of exposure, we can stratify our analyses by season. The logic here is that soil moisture, wind, disturbances, and other outdoor activity may vary by season, which may modify the association between wells and coccidioidomycosis risk. 
 ```
 cclongF <- fread("MockExposures.csv")
 
