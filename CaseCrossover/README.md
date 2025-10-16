@@ -1,6 +1,7 @@
 ## Case-Crossover 😷 
 
-The code and description below outlines the steps for conducting a case-crossover -- a commnon study design in epidemiology.
+The R code and description below outline the steps for conducting a case-crossover analysis -- a commnon study design in epidemiology. If you'd like to run the code on your own, please download the accompanying mock datasets. 
+
 
 **Overview**   
 The case-crossover approach is useful for examining associations between exposures to some risk factor that varies over time (e.g., air pollution, alcohol consumption) and an acute outcome (e.g., heart attack, car crash).  
