@@ -256,7 +256,7 @@ This allows us to calculate confidence intervals for:  feature importance for ea
 # Repeat model fitting on 100 random 80% subsamples to quantify uncertainty
 # Note this can take a while to run
 
-B <- 10
+B <- 100
 auc_boot <- numeric(B)
 
 imp_boot <- data.frame(Feature = imp$Feature, matrix(NA, nrow = nrow(imp), ncol = B))
