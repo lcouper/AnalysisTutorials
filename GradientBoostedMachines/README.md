@@ -245,9 +245,6 @@ imp <- xgb.importance(model = mfit_xgb)
 xgb.plot.importance(imp, top_n = 15, xlab = "Feature importance (Gain)")
 ```
 
-<img width="631" alt="image" src="https://github.com/user-attachments/assets/2cfd58ea-57ed-48d3-9057-299fb9ce7828">
-
-
 ### 11. Bootstrap xgboost models ###
 
 Now we can run the optimal model 100 times, each time on different 80% subset of data.  
