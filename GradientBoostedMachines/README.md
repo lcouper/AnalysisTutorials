@@ -28,6 +28,8 @@ Note that help constructing this code was provided by Dr. Caroline Glidden
 
 
 Necessary data can be downloaded [here.](https://github.com/lcouper/AnalysisTutorials/blob/main/GradientBoostedMachines/Q2_AllSpeciesPresAbs_AllPredictors_1000.csv)
+
+To run this more easily on your own machine, the R script can be found [here.](https://github.com/lcouper/AnalysisTutorials/blob/main/GradientBoostedMachines/GradientBoostedMachine_RScript.R)
     
 ### 1. Load packages and data ###
 
