@@ -116,6 +116,7 @@ Here, the predictors are:
 - all climate & land cover variables, 
 - some trap features 
 - potential spatial & temporal confounders (lat / long, surveillance year)
+
 The response is presence in trap (0/1) (i.e. a binary variable)
 
 ```
@@ -149,84 +150,67 @@ minitial_xgb = xgboost(data = xgb_train, nrounds = 40, objective = "binary:logis
 
 ### 7. Tune hyperparameters  ###
 
-There are 2 main options for hyperparmater tuning: grid search (uninformed, slower) and Bayesian optimization (faster, 'informed' based on prior results)
-
-### 7a. Tune using Bayesian Optimization 
+There are 2 main options for hyperparmater tuning: grid search (uninformed, slower) and Bayesian optimization (faster, 'informed' based on prior results). Here, we will do just Bayesian optimization.
 
 ```
-ntrees.max = 200
-xgb_cv_bayes <- function(eta, max.depth,gamma) {
-  cv <- xgb.cv(params = list(booster = "gbtree", eta = eta,
-                             max_depth = max.depth, 
-                             gamma = gamma,
-                             objective = "binary:logistic",
-                             eval_metric = "logloss",
-                             seed = 25),
-               data = xgb_train,
-               nrounds = ntrees.max,
-               nfold = 5, 
-               early_stopping_rounds = 10, 
-               scale_pos_weight = 4,
-               verbose = T)
-  list(Score = -unlist(cv$evaluation_log[cv$best_iteration, "test_logloss_mean"]), # Ensure score is negative, since optimization maximizes
-       Pred = cv$pred,
-       cb.print.evaluation(period = 1))}
+# Maximum number of boosting iterations evaluated during cross-validation
+ntrees_max <- 200 
 
-best_params <- BayesianOptimization(xgb_cv_bayes,
-                                    bounds = list(eta = c(0.1, 0.3),
-                                                  max.depth = c(2L, 10L),
-                                                  gamma = c(10, 20)),
-                                    init_grid_dt = NULL, init_points = 10,
-                                    n_iter = 3, acq = "ucb", kappa = 3,
-                                    eps = 1.5, verbose = T)
+# Function evaluated by the Bayesian optimizer
+# Each call fits an XGBoost model using k-fold CV on the training data
+# and returns the (negative) test log loss at the optimal iteration
 
+xgb_cv_bayes <- function(eta, max_depth, gamma) {
+  cv <- xgb.cv(params = list(
+    booster = "gbtree",                    # tree-based boosting
+    eta = eta,                             # learning rate (smaller = slower, less overfitting)
+    max_depth = as.integer(max_depth),     # maximum depth of each tree
+    gamma = gamma,                         # minimum loss reduction required for a split
+    objective = "binary:logistic",          # binary classification (0/1 outcome)
+    eval_metric = "logloss"),                 # evaluation metric minimized during CV
+  data = xgb_train,                         
+  nrounds = ntrees_max,                     # upper bound on number of trees
+  nfold = 5,                                # 5-fold cross-validation
+  early_stopping_rounds = 10,               # stop if log loss does not improve
+  verbose = FALSE)
+  
+  list(Score = -cv$evaluation_log[cv$best_iteration, test_logloss_mean])}
+
+# Run Bayesian optimization to efficiently explore hyperparameter space
+opt <- BayesianOptimization(
+  FUN = xgb_cv_bayes,
+  bounds = list(
+    eta = c(0.05, 0.3),                       # plausible learning rate range
+    max_depth = c(2L, 8L),                    # shallow to moderately deep trees
+    gamma = c(1, 10)),                        # from weak to strong split penalty
+  init_points = 10,                           # random initial evaluations
+  n_iter = 5,                                 # number of optimization steps
+  acq = "ucb",                                # upper confidence bound acquisition
+  kappa = 2.576,                              # exploration vs exploitation tradeoff
+  verbose = TRUE)
+
+# Best-performing hyperparameter combination
+best_params <- opt$Best_Par
 ```
 
-### 7b. Tune using grid search
-Note, this approach was not used in the manuscript, but followed the example [here.](https://www.r-bloggers.com/2020/11/r-xgboost-regression/)
 
-```
-# Set up grid with range of hyperparameters to try
-hyper_grid <- expand.grid(max_depth = seq(3, 6, 1), eta = seq(.2, .35, .01))  
-
-xgb_train_rmse = vector()
-xgb_test_rmse = vector()
-
-for (j in 1:nrow(hyper_grid)) {
-  set.seed(1234) 
-  m_xgb_untuned <- xgb.cv(
-    data = train_x,
-    label = train_y,
-    nrounds = 10, # INCREASE LATER
-    metrics = "rmse",
-    early_stopping_rounds = 10,
-    nfold = 5, # 5-fold cross validation
-    max_depth = hyper_grid$max_depth[j],
-    eta = hyper_grid$eta[j])
-  # if you want to store all the RMSE somewhere (not necessary for rest of loop to work)
-  xgb_train_rmse[j] <- m_xgb_untuned$evaluation_log$train_rmse_mean[m_xgb_untuned$best_iteration]
-  xgb_test_rmse[j] <- m_xgb_untuned$evaluation_log$test_rmse_mean[m_xgb_untuned$best_iteration]
-  cat(j, "\n")}    
-
-# Find the best parameters from the grid seach above
-
-df = cbind(xgb_train_rmse, xgb_test_rmse, 1:64) # 64 is based on grid size (4 depth values x 16 eta values)
-which.min(df[,2]) 
-hyper_grid[which.min(df[,2]),]
-```
 
 ### 8. Run model with optimal hyper parameters ###
 
 ```
-watchlist <- list(train = xgb_train, test = xgb_test)
-mfit_xgb = xgboost(data = xgb_train, 
-                   nrounds = 100, 
-                   eta = best_params$Best_Par[1],
-                   max_depth = best_params$Best_Par[2],
-                   gamma = best_params$Best_Par[3],
-                   objective = "binary:logistic",
-                   eval_metric = "logloss",
-                   scale_pos_weight = 4)
+params <- list(booster = "gbtree",
+          eta = unname(best_params["eta"]),
+          max_depth = as.integer(best_params["max_depth"]),
+          gamma = unname(best_params["gamma"]),
+          objective = "binary:logistic",  
+          eval_metric = "logloss")
+
+mfit_xgb <- xgb.train(params = params,
+          data = xgb_train,
+          nrounds = ntrees_max,
+          watchlist = list(train = xgb_train, test = xgb_test),
+          early_stopping_rounds = 10,
+          verbose = 1)
 ```
 
 ### 9. Evaluate model performance on test data ###
@@ -234,12 +218,15 @@ mfit_xgb = xgboost(data = xgb_train,
 Here we use AUC for evaluation since the outcome is binary 
 
 ```
-xgbpred = predict(mfit_xgb, xgb_test)
-true_vals = as.data.frame(test)[,146] # This number will vary depending on species. 146 is for Aedes sierrensis
-PredsTrue = cbind.data.frame(xgbpred, true_vals)
-# calculate AUC and plot ROC curve
-aucoutput = auc(PredsTrue$true_vals, PredsTrue$xgbpred) 
-plot(roc(PredsTrue[,2], PredsTrue[,1]), main = "ROC curve")
+xgb_pred <- predict(mfit_xgb, xgb_test)
+roc_obj <- roc(test_y, xgb_pred)
+auc_val <- auc(roc_obj)
+plot(roc_obj, main = sprintf("ROC curve (AUC = %.3f)", auc_val))
+
+# Confusion matrix; sensitivity & specificity
+pred_class <- ifelse(xgb_pred >= 0.5, 1, 0)
+confusionMatrix(factor(pred_class, levels = c(0, 1)),
+  factor(test_y, levels = c(0, 1)))
 ```
 
 ### 10. Examine feature importance 
@@ -250,11 +237,9 @@ We can calculate a few metrics of "importance" for each predictor:
 3) frequency : relative % of times a features was used in trees 
 
 ```
-importance_matrixFit <- xgb.importance(model = mfit_xgb)
+imp <- xgb.importance(model = mfit_xgb)
 
-# Plot "Importance" based on Gain
-xgb.plot.importance(importance_matrixFit, xlab = "Feature Importance",
-                    top_n = 12) # how many predictors to plot
+xgb.plot.importance(imp, top_n = 15, xlab = "Feature importance (Gain)")
 ```
 
 <img width="631" alt="image" src="https://github.com/user-attachments/assets/2cfd58ea-57ed-48d3-9057-299fb9ce7828">
@@ -266,60 +251,81 @@ Now we can run the optimal model 100 times, each time on different 80% subset of
 This allows us to calculate confidence intervals for:  feature importance for each of the predictors and AUC stats
 
 ```
-# 1. Importance matrix with rows for each predictor 
-importanceMatrixSubSamps = data.frame(matrix(nrow = 143, ncol = 101))
-importanceMatrixSubSamps[,1] = colnames(Species2)[-c(144:152)]
-colnames(importanceMatrixSubSamps)[1] = "Feature"
-# re-order alphabetically based on predictor name
-importanceMatrixSubSamps = importanceMatrixSubSamps[order(importanceMatrixSubSamps[,'Feature']),]
+# Repeat model fitting on 100 random 80% subsamples to quantify uncertainty
+# Note this can take a while to run
 
-# 2. AUC value from each run
-AUC = vector(length = 100)
+B <- 10
+auc_boot <- numeric(B)
 
-## Bootstrap run ##
+imp_boot <- data.frame(Feature = imp$Feature, matrix(NA, nrow = nrow(imp), ncol = B))
 
-for (i in 1:100){ 
-  # select random 80% subsample of original data & set-up xgboost data
-  # still splitting into testing and training so I can calculate AUC each time
-  SubSampRows = sort(sample(nrow(Species2), nrow(Species2)*.80))
-  SubSampTrain = data.matrix(Species2[SubSampRows, ])
-  SubSampTest = data.matrix(Species2[-SubSampRows, ])
-  SubSampTrain_x = SubSampTrain[, -c(144:152)]
-  SubSampTrain_y = SubSampTrain[,146]
-  SubSampTest_x = SubSampTest[, -c(144:152)]
-  SubSampTest_y = SubSampTest[,146]
+for (b in seq_len(B)) {
+  idx <- sort(sample(seq_len(n), size = floor(0.8 * n)))
   
-  xgb_SubSampTrain = xgb.DMatrix(data = SubSampTrain_x, label = SubSampTrain_y)
-  xgb_SubSampTest = xgb.DMatrix(data = SubSampTest_x, label = SubSampTest_y)
+  train_b <- SpeciesOH[idx, ]
+  test_b  <- SpeciesOH[-idx, ]
   
-  # run xgboost model
-  mfit_xgb_SubSamp = xgboost(data = xgb_SubSampTrain, 
-                             nrounds = 2,
-                             eta = best_params$Best_Par[1],
-                             max_depth = best_params$Best_Par[2],
-                             gamma = best_params$Best_Par[3],
-                             early_stopping_rounds = 10,
-                             objective = "binary:logistic",
-                             eval_metric = "logloss",
-                             scale_pos_weight = 4)
+  train_x_b <- as.matrix(train_b[, !colnames(train_b) %in% drop_vars])
+  train_y_b <- as.numeric(train_b[[response_var]])
   
-  # Pull out feature importance
-  temp = xgb.importance(model = mfit_xgb_SubSamp)
-  # Reorder alphabetically using merge
-  temp2 = merge(importanceMatrixSubSamps, temp[,1:2], by = "Feature", all.x = TRUE)
-  # Add this re-ordered column (in column 102 of temp2, the merged df) to matrix
-  importanceMatrixSubSamps[,(i+1)] = temp2[,102]
+  test_x_b  <- as.matrix(test_b[, !colnames(test_b) %in% drop_vars])
+  test_y_b  <- as.numeric(test_b[[response_var]])
   
-  # calculate AUC
-  xgbpredSubSamp = predict(mfit_xgb_SubSamp, xgb_SubSampTest)
-  true_valsSubSamp = as.data.frame(SubSampTest)[,146]
-  PredsTrueSubSamp = cbind.data.frame(xgbpredSubSamp, true_valsSubSamp)
-  # calculate AUC and plot ROC curve
-  AUC[i] = auc(PredsTrueSubSamp[,2], PredsTrueSubSamp[,1]) 
-}
+  xgb_train_b <- xgb.DMatrix(train_x_b, label = train_y_b)
+  xgb_test_b  <- xgb.DMatrix(test_x_b,  label = test_y_b)
+  
+  m_b <- xgboost(
+    data = xgb_train_b,
+    nrounds = mfit_xgb$best_iteration,
+    eta = best_params["eta"],
+    max_depth = as.integer(best_params["max_depth"]),
+    gamma = best_params["gamma"],
+    objective = "binary:logistic",
+    eval_metric = "logloss",
+    verbose = 0)
+  
+  pred_b <- predict(m_b, xgb_test_b)
+  auc_boot[b] <- auc(test_y_b, pred_b)
+  
+  imp_b <- xgb.importance(model = m_b)
+  imp_boot[, b + 1] <- imp_b$Gain[match(imp_boot$Feature, imp_b$Feature)]}
+
 ```
 
-Plot showing results of variable importance in predicting vector species presence/absence. For each species, predictors are ranked based on their mean gain across the 100 model iterations
+### 12. Create bootstrap summaries for model performance and feature importance ####
 
-![Image 1](https://github.com/user-attachments/assets/41a38c74-4200-4ead-8828-216594870d17)
+```
+# AUC mean + 95% CI
+auc_summary <- c(
+  mean = mean(auc_boot, na.rm = TRUE),
+  lwr  = quantile(auc_boot, 0.025, na.rm = TRUE),
+  upr  = quantile(auc_boot, 0.975, na.rm = TRUE))
 
+auc_summary
+
+# show distribution of AUC values 
+hist(auc_boot, breaks = 20, main = "Bootstrap AUC distribution", xlab = "AUC")
+abline(v = auc_summary, col = c("black","red","red"), lwd = 2, lty = c(1,2,2))
+
+# Feature importance mean + 95% CI
+imp_mat <- imp_boot[, -1, drop = FALSE]
+imp_boot$selection_rate <- rowMeans(!is.na(imp_mat))
+imp_boot$mean_gain <- rowMeans(imp_mat, na.rm = TRUE)
+imp_boot$lwr_gain <- apply(imp_mat, 1, quantile, probs = 0.025, na.rm = TRUE)
+imp_boot$upr_gain <- apply(imp_mat, 1, quantile, probs = 0.975, na.rm = TRUE)
+
+# Keep features with finite importance and reasonable stability
+imp_boot <- imp_boot[is.finite(imp_boot$mean_gain) & imp_boot$mean_gain > 0 & imp_boot$selection_rate >= 0.2, ]
+imp_boot <- imp_boot[order(-imp_boot$mean_gain), ]
+
+# Plot top features with uncertainty (most important at top)
+top_imp <- head(imp_boot, 15)
+ypos <- rev(seq_len(nrow(top_imp)))
+xlims <- range(c(top_imp$lwr_gain, top_imp$upr_gain), finite = TRUE, na.rm = TRUE)
+
+par(mar = c(5, 10, 2, 2))
+plot(top_imp$mean_gain, ypos, xlim = xlims, yaxt = "n",
+     xlab = "Feature importance (Gain)", ylab = "", pch = 16)
+segments(top_imp$lwr_gain, ypos, top_imp$upr_gain, ypos)
+axis(2, at = ypos, labels = top_imp$Feature, las = 2)
+```
