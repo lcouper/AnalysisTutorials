@@ -25,6 +25,9 @@ Note that help constructing this code was provided by Dr. Caroline Glidden
 10. Examine feature importance
 11. Bootstrap model performance and feature importance
 12. Summarize bootstrap uncertainty
+
+
+Necessary data can be downloaded [here.](https://github.com/lcouper/AnalysisTutorials/blob/main/GradientBoostedMachines/Q2_AllSpeciesPresAbs_AllPredictors_1000.csv)
     
 ### 1. Load packages and data ###
 
